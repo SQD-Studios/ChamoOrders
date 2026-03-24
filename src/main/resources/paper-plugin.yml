@@ -1,13 +1,13 @@
 name: ChamoOrders
-version: '1.0'
+version: '1.0-ALPHA'
 main: net.chamosmp.net.ChamoOrders.paper.PaperMain
 description: An in-house plugin for ChamoSMP
 api-version: '1.21.11'
 folia-supported: false
-bootstrapper: net.chamosmp.net.ChamoOrders.paper.bootstrapper
+#bootstrapper: net.chamosmp.net.ChamoOrders.paper.bootstrapper
 #loader: io.papermc.testplugin.TestPluginLoader
 dependencies:
-  bootstrap:
+#  bootstrap:
 
   server:
     Vault:

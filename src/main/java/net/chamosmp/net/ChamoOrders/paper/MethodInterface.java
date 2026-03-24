@@ -1,4 +1,4 @@
-package net.chamosmp.ChamoOrders.core;
+package net.chamosmp.net.ChamoOrders.paper;
 
 import java.io.File;
 import java.io.InputStreamReader;

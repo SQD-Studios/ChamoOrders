@@ -1,4 +1,4 @@
-/*package net.chamosmp.ChamoOrders.core.Inventory;
+/*package net.chamosmp.net.ChamoOrders.paper.Inventory;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;

@@ -1,4 +1,4 @@
-/*package net.chamosmp.ChamoOrders.core.Database;
+/*package net.chamosmp.net.ChamoOrders.paper.Database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

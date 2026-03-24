@@ -1,6 +1,5 @@
-package net.chamosmp.ChamoOrders.core.Commands;
+package net.chamosmp.net.ChamoOrders.paper.Commands;
 
-import io.papermc.paper.command.*;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.jetbrains.annotations.Nullable;

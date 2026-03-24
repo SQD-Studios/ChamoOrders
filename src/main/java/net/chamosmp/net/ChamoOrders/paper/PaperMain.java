@@ -1,14 +1,11 @@
-package io.papermc.testplugin;
+package net.chamosmp.net.ChamoOrders.paper;
 
 
-import io.papermc.paper.command.brigadier.BasicCommand;
-import net.chamosmp.ChamoOrders.core.Commands.SimpleCommand;
+import net.chamosmp.net.ChamoOrders.paper.Commands.SimpleCommand;
 import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PaperMain extends JavaPlugin implements Listener {
@@ -19,7 +16,7 @@ public class PaperMain extends JavaPlugin implements Listener {
         Metrics metrics = new Metrics(this, pluginId);
 
         // Optional: Add custom charts
-       // metrics.addCustomChart();
+        //metrics.addCustomChart();
         //  BasicCommand yourCommand = "order";
         registerCommand("order", new SimpleCommand());
     }
