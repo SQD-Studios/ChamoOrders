@@ -47,3 +47,4 @@ bin/
 /paper/run/
 /.idea/
 /radle/
+/gradle.properties
