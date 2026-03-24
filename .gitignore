@@ -46,5 +46,4 @@ bin/
 ### Extra ###
 /paper/run/
 /.idea/
-/radle/
 /gradle.properties
