@@ -3,10 +3,11 @@ package net.chamosmp.ChamoOrders.core.Commands;
 import io.papermc.paper.command.*;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
-import java.awt.*;
+//import org.jspecify.annotations.Nullable;
+import net.kyori.adventure.text.Component;
+//import java.awt.*;
 
 @NullMarked
 public class SimpleCommand implements BasicCommand {
