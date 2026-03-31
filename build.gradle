@@ -57,6 +57,7 @@ tasks {
     runServer {
         downloadPlugins {
            //url("https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar")
+            modrinth("VaultUnlocked", "2.19.0-release")
         }
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.

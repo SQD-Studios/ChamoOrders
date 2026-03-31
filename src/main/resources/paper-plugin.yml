@@ -3,7 +3,7 @@ version: '1.0-ALPHA'
 main: net.chamosmp.net.ChamoOrders.paper.PaperMain
 description: An in-house plugin for ChamoSMP
 api-version: '1.21.11'
-folia-supported: false
+folia-supported: true
 #bootstrapper: net.chamosmp.net.ChamoOrders.paper.bootstrapper
 #loader: io.papermc.testplugin.TestPluginLoader
 dependencies:
@@ -12,12 +12,8 @@ dependencies:
   server:
     Vault:
       load: BEFORE
-      required: false
+      required: true
       join-classpath: true
     PlaceholderAPI:
       load: BEFORE
       required: false
-    VaultUnlocked:
-      load: BEFORE
-      required: false
-      join-classpath: true
