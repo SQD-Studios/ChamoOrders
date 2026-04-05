@@ -1,4 +1,4 @@
-package net.chamosmp.net.ChamoOrders.paper.Inventory;
+/*package net.chamosmp.net.ChamoOrders.paper.Inventory;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
@@ -11,3 +11,5 @@ public class OrderInv{
 
     //InventoryView view = VIEWS.get(player);
 }
+
+ */
