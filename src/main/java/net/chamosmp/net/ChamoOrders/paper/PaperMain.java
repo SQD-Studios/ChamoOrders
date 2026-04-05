@@ -4,22 +4,17 @@ package net.chamosmp.net.ChamoOrders.paper;
 import net.chamosmp.net.ChamoOrders.paper.Commands.SimpleCommand;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
 
 public class PaperMain extends JavaPlugin implements Listener {
 
     private static Economy econ = null;
     private static Permission perms = null;
+
     public static JavaPlugin get() {
         return null;
     }
@@ -37,6 +32,9 @@ public class PaperMain extends JavaPlugin implements Listener {
 
         //Vault
         if (!setupEconomy()) {
+            getLogger().severe("Vault economy setup failed. Disabling ChamoOrders plugin.");
+            getLogger().severe("Please ensure that Vault and a compatible economy plugin are installed and enabled.");
+            getServer().getPluginManager().disablePlugin(this);
             return;
         }
         setupPermissions();

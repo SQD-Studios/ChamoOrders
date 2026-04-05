@@ -23,11 +23,11 @@ dependencies {
     implementation("net.kyori:adventure-api:4.26.1")
     implementation("net.kyori:adventure-text-minimessage:4.26.1")
     compileOnly("net.milkbowl.vault:VaultUnlockedAPI:2.16")
-//    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("me.clip:placeholderapi:2.12.2")
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("net.kyori:adventure-text-serializer-ansi:4.26.1")
     implementation("org.spongepowered:configurate-hocon:4.2.0")
+    compileOnly("com.zaxxer:HikariCP:6.3.0")
 
 }
 tasks.shadowJar {
@@ -46,7 +46,9 @@ tasks {
     runServer {
         downloadPlugins {
             //url("https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar")
-            modrinth("VaultUnlocked", "2.19.0-release")
+            //modrinth("VaultUnlocked", "2.19.0-release")
+            url("https://github.com/EssentialsX/Essentials/releases/download/2.21.2/EssentialsX-2.21.2.jar")
+            url("https://download.luckperms.net/1631/bukkit/loader/LuckPerms-Bukkit-5.5.42.jar")
         }
         // Configure the Minecraft version for our task.
         // This is the only required configuration besides applying the plugin.
