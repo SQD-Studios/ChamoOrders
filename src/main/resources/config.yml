@@ -1,6 +1,45 @@
-# This is the configuration file of ChamoOrders
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
+#                                                                                   |
+#           /                    /              /\                                  |
+#          /                    /              /  \                                 |
+#         /                    /              /    \                                |
+#        /                    /              /      \                               |
+#                                    /      /        \                              |
+#   \                              _/      /__________\                             |
+#    \                          _ /       /------------\                            |
+#     \                        /         /              \                           |
+#      \______________________/         /                \                          |
+#                                                                                   |
+#                                     Chamo/SQD Studios Product                     |
+#                                                                                   |
+#  ChamoOrders V1.0.0ALPHA configuration file                                       |
+#                                                                                   |
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<|
 
-
+# A prefix of all messages
+prefix: ""
 
 # Usable options: MySQL, SQLite
 storage: "SQLite"
+
+# Needed only when using MySQL
+credentials:
+  address:
+  database-name:
+  username:
+  password:
+
+# Order related settings
+orders:
+  max-active: 5
+  min-price: 1
+  create-tax: 0.01
+  max-enchants:
+
+
+
+
+# Configuration Done! Such a small config
+
+# Do not change. (Btw this does nothing rn)
+config-version: 6.7
