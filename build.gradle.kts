@@ -16,6 +16,12 @@ repositories {
     maven("https://repo.codemc.io/repository/creatorfromhell/")
     maven("https://jitpack.io")
     maven("https://repo.extendedclip.com/releases/")
+
+    // Faststats.dev
+    maven {
+        name = "faststatsReleases"
+        url = uri("https://repo.faststats.dev/releases")
+    }
 }
 
 dependencies {
@@ -28,6 +34,7 @@ dependencies {
     implementation("net.kyori:adventure-text-serializer-ansi:4.26.1")
     implementation("org.spongepowered:configurate-hocon:4.2.0")
     compileOnly("com.zaxxer:HikariCP:6.3.0")
+    implementation("dev.faststats.metrics:bukkit:0.21.0")
 
 }
 tasks.shadowJar {
@@ -35,12 +42,13 @@ tasks.shadowJar {
 
     dependencies {
         // Only merge bStats into the final jar, no other dependencies
-        exclude { it.moduleGroup != "org.bstats" }
+        include { it.moduleGroup == "org.bstats" }
     }
 
     // Relocate bStats into the plugin"s package to avoid conflicts with other
     // plugins using bStats
     relocate("org.bstats", project.group.toString())
+    relocate("dev.faststats", "your.plugin.libs.faststats")
 }
 tasks {
     runServer {

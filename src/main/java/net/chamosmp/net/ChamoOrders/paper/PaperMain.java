@@ -9,6 +9,11 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
+import dev.faststats.bukkit.BukkitMetrics;
+import dev.faststats.core.ErrorTracker;
+import dev.faststats.core.data.Metric;
+
+import java.net.URI;
 
 public class PaperMain extends JavaPlugin implements Listener {
 
@@ -19,8 +24,25 @@ public class PaperMain extends JavaPlugin implements Listener {
         return null;
     }
 
+    public static final ErrorTracker ERROR_TRACKER = ErrorTracker.contextAware();
+    private final BukkitMetrics metrics = BukkitMetrics.factory()
+            // Required: Your API token
+            // This token does not have to be treated as a secret
+            .token("5a479db4d8148ff3071847a38980ebe4")
+            // Optional: Attach an error tracker
+            // This must be enabled in the project settings
+            .errorTracker(ERROR_TRACKER)
+            // Optional: Project specific debug logging, useful during development
+            .debug(true)
+            // Optional: Called when metrics data is flushed and the server accepted the data
+            // Useful for cleaning up data, invalidating caches, or resetting counters
+            .onFlush(() -> resetCounters())
+            // Create the metrics instance
+            .create(this);
+
     @Override
     public void onEnable() {
+        metrics.ready();
         //Open Universal and methods
 
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -41,6 +63,7 @@ public class PaperMain extends JavaPlugin implements Listener {
     }
     @Override
     public void onDisable() {
+        metrics.shutdown();
         getLogger().info(String.format("[%s] Disabled Version %s", getDescription().getName(), getDescription().getVersion()));
     }
     private boolean setupEconomy() {
