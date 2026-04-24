@@ -34,7 +34,7 @@ dependencies {
     implementation("net.kyori:adventure-text-serializer-ansi:5.0.1")
     implementation("org.spongepowered:configurate-hocon:4.2.0")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
-    implementation("dev.faststats.metrics:bukkit:0.21.0")
+    implementation("dev.faststats.metrics:bukkit:0.22.0")
 
 }
 tasks.shadowJar {
