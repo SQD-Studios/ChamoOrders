@@ -32,7 +32,7 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.12.2")
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("net.kyori:adventure-text-serializer-ansi:4.26.1")
-    implementation("org.spongepowered:configurate-hocon:4.2.0")
+    implementation("org.spongepowered:configurate-yaml:4.2.0")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
     implementation("dev.faststats.metrics:bukkit:0.21.0")
 
@@ -43,12 +43,15 @@ tasks.shadowJar {
     dependencies {
         // Only merge bStats into the final jar, no other dependencies
         include { it.moduleGroup == "org.bstats" }
+        include { it.moduleGroup == "dev.faststats"}
     }
 
     // Relocate bStats into the plugin"s package to avoid conflicts with other
     // plugins using bStats
     relocate("org.bstats", project.group.toString())
-    relocate("dev.faststats", "your.plugin.libs.faststats")
+    relocate("dev.faststats", "net.chamosmp.net.ChamoOrders.paper")
+
+   // relocate("dev.faststats", "")
 }
 tasks {
     runServer {

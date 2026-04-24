@@ -7,13 +7,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault2.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.ErrorTracker;
 import dev.faststats.core.data.Metric;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 
 public class PaperMain extends JavaPlugin implements Listener {
 
@@ -34,11 +38,9 @@ public class PaperMain extends JavaPlugin implements Listener {
             .errorTracker(ERROR_TRACKER)
             // Optional: Project specific debug logging, useful during development
             .debug(true)
-            // Optional: Called when metrics data is flushed and the server accepted the data
-            // Useful for cleaning up data, invalidating caches, or resetting counters
-            .onFlush(() -> resetCounters())
             // Create the metrics instance
             .create(this);
+
 
     @Override
     public void onEnable() {
