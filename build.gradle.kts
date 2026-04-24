@@ -32,7 +32,7 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.12.2")
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("net.kyori:adventure-text-serializer-ansi:5.0.1")
-    implementation("org.spongepowered:configurate-hocon:4.2.0")
+    implementation("org.spongepowered:configurate-yaml:4.2.0")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
     implementation("dev.faststats.metrics:bukkit:0.22.0")
 
