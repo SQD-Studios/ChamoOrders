@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.60-stable")
     implementation("net.kyori:adventure-api:5.0.1")
     implementation("net.kyori:adventure-text-minimessage:5.0.1")
     compileOnly("net.milkbowl.vault:VaultUnlockedAPI:2.19")
