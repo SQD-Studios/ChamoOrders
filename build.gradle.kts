@@ -25,13 +25,16 @@ repositories {
 }
 
 dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    implementation("net.kyori:adventure-api:5.1.0")
+    implementation("net.kyori:adventure-text-minimessage:5.1.0")
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.63-stable")
     implementation("net.kyori:adventure-api:5.0.1")
     implementation("net.kyori:adventure-text-minimessage:5.0.1")
     compileOnly("net.milkbowl.vault:VaultUnlockedAPI:2.19")
     compileOnly("me.clip:placeholderapi:2.12.2")
     implementation("org.bstats:bstats-bukkit:3.2.1")
-    implementation("net.kyori:adventure-text-serializer-ansi:5.0.1")
+    implementation("net.kyori:adventure-text-serializer-ansi:5.1.0")
     implementation("org.spongepowered:configurate-yaml:4.2.0")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
     implementation("dev.faststats.metrics:bukkit:0.22.0")
