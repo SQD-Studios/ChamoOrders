@@ -36,7 +36,7 @@ dependencies {
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("net.kyori:adventure-text-serializer-ansi:5.1.0")
     implementation("org.spongepowered:configurate-yaml:4.2.0")
-    compileOnly("com.zaxxer:HikariCP:7.0.2")
+    compileOnly("com.zaxxer:HikariCP:7.1.0")
     implementation("dev.faststats.metrics:bukkit:0.22.0")
 
 }
