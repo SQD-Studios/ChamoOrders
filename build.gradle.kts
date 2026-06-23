@@ -31,7 +31,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.63-stable")
     implementation("net.kyori:adventure-api:5.0.1")
     implementation("net.kyori:adventure-text-minimessage:5.0.1")
-    compileOnly("net.milkbowl.vault:VaultUnlockedAPI:2.19")
+    compileOnly("net.milkbowl.vault:VaultUnlockedAPI:2.20")
     compileOnly("me.clip:placeholderapi:2.12.2")
     implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("net.kyori:adventure-text-serializer-ansi:5.1.0")
