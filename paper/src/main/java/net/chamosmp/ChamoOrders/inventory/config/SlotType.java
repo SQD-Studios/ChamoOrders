@@ -8,7 +8,7 @@ public sealed interface SlotType {
     record Decorative() implements SlotType {
     }
 
-    record SkinSlot(int index) implements SlotType {
+    record OrderItemSlot(int index) implements SlotType {
     }
 
     record FilterSlot() implements SlotType {

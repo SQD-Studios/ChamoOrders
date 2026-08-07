@@ -71,4 +71,8 @@ public final class GuiMultiPageUtil<T> {
         return availableSlots;
     }
 
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
 }

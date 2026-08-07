@@ -3,8 +3,9 @@ package net.chamosmp.ChamoOrders;
 import dev.faststats.bukkit.BukkitMetrics;
 import dev.faststats.core.ErrorTracker;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.chamosmp.ChamoOrders.commands.AdminBrigadier;
-import net.chamosmp.ChamoOrders.commands.Order;
+import net.chamosmp.ChamoOrders.api.ChamoOrders;
+import net.chamosmp.ChamoOrders.commands.AdminCommandBrigadier;
+import net.chamosmp.ChamoOrders.commands.OrderCommand;
 import net.chamosmp.ChamoOrders.inventory.GuiFillerUtil;
 import net.chamosmp.ChamoOrders.papi.ChamoOrdersPlaceholderApi;
 import net.chamosmp.ChamoOrders.util.ConfigUtil;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 
-public class ChamoOrdersPlugin extends JavaPlugin {
+public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrders {
 
     private static Economy econ;
 
@@ -64,6 +65,8 @@ public class ChamoOrdersPlugin extends JavaPlugin {
      */
     public void reloadConfig() {
         ConfigUtil.loadOrAdapt(this, "config.yml");
+        ConfigUtil.loadDataFile(this, "ui/inv/orders.yml");
+        if (languageUtil != null) languageUtil.loadLanguage(getConfig().getString("language", "en"));
     }
 
     private void init() {
@@ -85,9 +88,9 @@ public class ChamoOrdersPlugin extends JavaPlugin {
 
     private void registerCommands() {
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event -> {
-            AdminBrigadier.register(event.registrar(), this);
+            AdminCommandBrigadier.register(event.registrar(), this);
         }));
-        registerCommand("order", "Open the orders gui", List.of("orders"), new Order());
+        registerCommand("order", "Open the orders gui", List.of("orders"), new OrderCommand(this, dialogUtil));
         LoggerUtil.log(LoggerUtil.LogType.INFO, "Successfully registered commands");
     }
 

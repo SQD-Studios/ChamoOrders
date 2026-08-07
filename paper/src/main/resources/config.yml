@@ -49,12 +49,20 @@ orders:
 
       max-enchants: -1 # Max enchants an item can have. -1 to disable
 
-filler: # Fill your GUI's empty slots into filler items
+filler: # Fill your GUI's empty slots into filler items. Currently works on guis "orders.yml" (Because the rest didn't seem appropriate. If you want to do it yourself disable this)
   filler-item: true
   item:
     material: GRAY_STAINED_GLASS_PANE
     name: " "
     lore: [ ]
     glow: false
+
+inventory:
+  order-items:
+    name: "{material}"
+    lore:
+      - ""
+      - "<dark_gray>{price} each"
+      - "<dark_gray>{delivered}/{amount} Delivered"
 
 # Configuration Done! Such a small config

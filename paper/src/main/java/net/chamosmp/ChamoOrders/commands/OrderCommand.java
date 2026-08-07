@@ -3,8 +3,12 @@ package net.chamosmp.ChamoOrders.commands;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import net.chamosmp.ChamoOrders.ChamoOrdersPlugin;
+import net.chamosmp.ChamoOrders.inventory.orders.MainOrder;
+import net.chamosmp.ChamoOrders.util.DialogUtil;
 import net.chamosmp.ChamoOrders.util.LoggerUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
@@ -16,7 +20,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-public class Order implements BasicCommand {
+public class OrderCommand implements BasicCommand {
+
+    private final ChamoOrdersPlugin plugin;
+    private final DialogUtil dialogUtil;
+
+    public OrderCommand(ChamoOrdersPlugin plugin, DialogUtil dialogUtil) {
+        this.plugin = plugin;
+        this.dialogUtil = dialogUtil;
+    }
+
     @Override
     public void execute(CommandSourceStack commandSourceStack, String[] args) {
         Player player;
@@ -27,18 +40,11 @@ public class Order implements BasicCommand {
             return;
         }
         if (args.length == 0) {
-            // TODO Open order gui
+            new MainOrder(player, plugin, dialogUtil).open();
             return;
         }
-        final String message = String.join(" ", args);
-
-        Player searchedPlayer = Bukkit.getPlayerExact(message);
-        if (searchedPlayer != null) {
-            // TODO Open the specified player's orders
-            return;
-        }
-
-        // TODO Open the orders with the search
+        final String search = String.join(" ", args);
+        new MainOrder(player, plugin, dialogUtil).open(search);
     }
 
     @Override
@@ -50,20 +56,6 @@ public class Order implements BasicCommand {
     public @NonNull Collection<String> suggest(@NonNull CommandSourceStack source, String @NonNull [] args) {
         if (args.length == 0) {
             return Collections.singleton("[<search>]");
-        }
-        AtomicBoolean searchesForPlayer = new AtomicBoolean(false);
-        AtomicReference<String> pl = new AtomicReference<>();
-        Bukkit.getOnlinePlayers().stream().map(Player::getName).toList().forEach(p -> {
-            if (p.toLowerCase().startsWith(String.join(" ", args).toLowerCase())) {
-                searchesForPlayer.set(true);
-                pl.set(p);
-            }
-        });
-        if (searchesForPlayer.get()) {
-            if (pl.get() == null) {
-                return List.of();
-            }
-            return List.of(pl.get());
         }
         return List.of();
     }

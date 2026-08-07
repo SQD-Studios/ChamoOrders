@@ -10,10 +10,10 @@ import org.bukkit.command.CommandSender;
 @Command("chamoorders")
 @Aliases({"ordersadmin", "orderadmin"})
 @Permission("chamoorders.admin")
-public class Admin {
+public class AdminCommand {
     private final ChamoOrdersPlugin plugin;
 
-    public Admin(ChamoOrdersPlugin plugin) {
+    public AdminCommand(ChamoOrdersPlugin plugin) {
         this.plugin = plugin;
     }
 

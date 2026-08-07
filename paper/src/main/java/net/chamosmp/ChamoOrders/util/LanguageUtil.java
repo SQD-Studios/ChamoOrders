@@ -25,7 +25,7 @@ public class LanguageUtil {
      * Loads a language file from lang/<code >.yml</code><br>
      * Falls back to default language if the file is missing or invalid.
      */
-    private void loadLanguage(String langCode) {
+    public void loadLanguage(String langCode) {
         try {
             YamlConfiguration yaml = ConfigUtil.loadOrAdapt(plugin, "lang/" + langCode + ".yml");
             messages.clear();

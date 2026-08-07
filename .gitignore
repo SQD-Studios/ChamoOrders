@@ -42,7 +42,6 @@ bin/
 .DS_Store
 
 ### Extra ###
-/paper/run/
 /.idea/
 /gradle.properties
-/run/
+/**/run
