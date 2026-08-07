@@ -1,72 +1,68 @@
 plugins {
     id("java")
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.6.1"
     id("xyz.jpenilla.run-paper") version "3.0.2"
 }
 
-group = "net.chamosmp"
-version = "1.0-ALPHA"
+group = "net.chamosmp.ChamoOrders"
+version = "1.0.0"
 
 repositories {
-    mavenCentral()
     maven {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-    maven("https://repo.codemc.io/repository/creatorfromhell/")
-    maven("https://jitpack.io")
-    maven("https://repo.extendedclip.com/releases/")
-
-    // Faststats.dev
+    } // PaperAPI
+    maven("https://jitpack.io") // VaultAPI
+    maven("https://repo.extendedclip.com/releases/") // PlaceholderAPI
+    mavenCentral() // HikariCP
+    maven("https://repo.faststats.dev/releases") // Faststats
     maven {
-        name = "faststatsReleases"
-        url = uri("https://repo.faststats.dev/releases")
-    }
+        name = "eldonexus"
+        url = uri("https://eldonexus.de/repository/maven-public/")
+    } // StrokkCommands
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    implementation("net.kyori:adventure-api:5.1.0")
-    implementation("net.kyori:adventure-text-minimessage:5.1.0")
-    compileOnly("io.papermc.paper:paper-api:26.1.2.build.63-stable")
-    implementation("net.kyori:adventure-api:5.0.1")
-    implementation("net.kyori:adventure-text-minimessage:5.0.1")
-    compileOnly("net.milkbowl.vault:VaultUnlockedAPI:2.19")
-    compileOnly("me.clip:placeholderapi:2.12.2")
-    implementation("org.bstats:bstats-bukkit:3.2.1")
-    implementation("net.kyori:adventure-text-serializer-ansi:5.1.0")
-    implementation("org.spongepowered:configurate-yaml:4.2.0")
-    compileOnly("com.zaxxer:HikariCP:7.0.2")
-    implementation("dev.faststats.metrics:bukkit:0.22.0")
+    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 
-}
-tasks.shadowJar {
-//    configurations = project.configurations.runtimeClasspath.map { setOf(it) }
+    compileOnly("net.strokkur.commands:annotations-paper:2.1.4")
+    annotationProcessor("net.strokkur.commands:processor-paper:2.1.4")
 
-    dependencies {
-        // Only merge bStats into the final jar, no other dependencies
-        include { it.moduleGroup == "org.bstats" }
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
+        exclude("org.bukkit", "bukkit")
     }
+    compileOnly("me.clip:placeholderapi:2.12.3")
 
-    // Relocate bStats into the plugin"s package to avoid conflicts with other
-    // plugins using bStats
-    relocate("org.bstats", project.group.toString())
-    relocate("dev.faststats", "your.plugin.libs.faststats")
+    compileOnly("com.zaxxer:HikariCP:7.1.0")
+    implementation("dev.faststats.metrics:bukkit:0.22.0")
 }
+
 tasks {
     runServer {
         downloadPlugins {
-            //url("https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar")
-            //modrinth("VaultUnlocked", "2.19.0-release")
-            url("https://github.com/EssentialsX/Essentials/releases/download/2.21.2/EssentialsX-2.21.2.jar")
-            url("https://download.luckperms.net/1631/bukkit/loader/LuckPerms-Bukkit-5.5.42.jar")
+            github("MilkBowl", "Vault", "1.7.3", "Vault.jar") // Vault (The economy)
+            modrinth("hXiIvTyT", "2.22.0") // EssentialsX (Vault Economy Provider)
+            modrinth("lKEzGugV", "2.12.3") // PlaceholderAPI
+            modrinth("Vebnzrzj", "v5.5.53-bukkit") // Luckperms
         }
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin"s jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.2")
     }
     runPaper.folia.registerTask()
+
+    processResources {
+        val props = mapOf("version" to project.version)
+        inputs.properties(props)
+        filteringCharset = "UTF-8"
+
+        filesMatching("paper-plugin.yml") {
+            expand(props)
+        }
+    }
+
+    shadowJar {
+        configurations = project.configurations.runtimeClasspath.map { setOf(it) }
+        relocate("dev.faststats", "net.chamosmp.chamoorders.libs.faststats")
+    }
 }
 
 java {

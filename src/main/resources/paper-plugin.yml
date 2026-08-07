@@ -1,19 +1,36 @@
 name: ChamoOrders
-version: '1.0-ALPHA'
-main: net.chamosmp.net.ChamoOrders.paper.PaperMain
-description: An in-house plugin for ChamoSMP
-api-version: '1.21.11'
-folia-supported: true
-#bootstrapper: net.chamosmp.net.ChamoOrders.paper.bootstrapper
-#loader: io.papermc.testplugin.TestPluginLoader
-dependencies:
-#  bootstrap:
+version: '${version}'
 
+main: net.chamosmp.ChamoOrders.ChamoOrdersPlugin
+loader: net.chamosmp.ChamoOrders.ChamoOrdersLoader
+api-version: '1.21.11'
+
+folia-supported: true
+
+dependencies:
   server:
     Vault:
       load: BEFORE
-      required: true
+      required: false
       join-classpath: true
     PlaceholderAPI:
       load: BEFORE
       required: false
+      join-classpath: true
+
+permissions:
+  chamoparty.order:
+    default: not op
+    description: "This permission allows using /order"
+    children:
+      permission.node.child: true
+  chamoorders.admin:
+    default: op
+    description: "Allows using the admin commands"
+    children:
+      permission.node.child: true
+  chamoorders.admin.reload:
+    default: op
+    description: "Allows using /reload"
+    children:
+      permission.node.child: true

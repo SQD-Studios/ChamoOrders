@@ -16,30 +16,45 @@
 #                                                                                   |
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<|
 
-# A prefix of all messages
-prefix: ""
+debug: false # We recommend not setting this to true, as it shows internal info and spams the console
 
-# Usable options: MySQL, SQLite
-storage: "SQLite"
+language: en
 
-# Needed only when using MySQL
-credentials:
-  address:
-  database-name:
-  username:
-  password:
+database:
+  type: SQLite # Usable options: MySQL, SQLite
+
+  credentials: # Not Needed fot SQLite
+    host: localhost
+    port: 3306
+    database: chamoorders
+    username: root
+    password: pass
 
 # Order related settings
 orders:
-  max-active: 5
-  min-price: 1
-  create-tax: 0.01
-  max-enchants:
+  new-order-settings:
+    tax-percent: 0.1 # Extra percentage charged when a player creates a new order.
+    default-max-orders: 3 # Set -1 to allow infinite. You can set permissions like chamoorders.maxorders.(number of orders) for a different one
 
+  # Item settings
+  items:
+    type: blacklist # Whitelist if you want only those items to be allowed and blacklist (recommended) for the items to be blocked
+    list: # Whitelist or Blacklist based on the options above
+      -
 
+    enchants:
+      type: blacklist # Whitelist if you want only selected enchants to be allowed and blacklist (recommended) for the enchants to be blocked
+      list: # Whitelist or Blacklist based on the options above
+        -
 
+      max-enchants: -1 # Max enchants an item can have. -1 to disable
+
+filler: # Fill your GUI's empty slots into filler items
+  filler-item: true
+  item:
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+    lore: [ ]
+    glow: false
 
 # Configuration Done! Such a small config
-
-# Do not change. (Btw this does nothing rn)
-config-version: 6.7
