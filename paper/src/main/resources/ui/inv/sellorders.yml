@@ -1,0 +1,5 @@
+title: "Put the items you want to deliver"
+size: 27
+on-close: OpenDeliverUi # Allowed: OpenDeliverUi, DeliverItems
+slots:
+  # You can leave it like this.

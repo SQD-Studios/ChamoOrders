@@ -7,6 +7,8 @@ import net.chamosmp.ChamoOrders.api.ChamoOrders;
 import net.chamosmp.ChamoOrders.commands.AdminCommandBrigadier;
 import net.chamosmp.ChamoOrders.commands.OrderCommand;
 import net.chamosmp.ChamoOrders.inventory.GuiFillerUtil;
+import net.chamosmp.ChamoOrders.inventory.GuiListener;
+import net.chamosmp.ChamoOrders.inventory.orders.OrderSellItems;
 import net.chamosmp.ChamoOrders.papi.ChamoOrdersPlaceholderApi;
 import net.chamosmp.ChamoOrders.util.ConfigUtil;
 import net.chamosmp.ChamoOrders.util.DialogUtil;
@@ -51,6 +53,9 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrders {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new ChamoOrdersPlaceholderApi(this).register();
         }
+
+        registerListeners();
+
         LoggerUtil.log(LoggerUtil.LogType.INFO, "Finished enabling ChamoOrders");
     }
 
@@ -67,6 +72,11 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrders {
         ConfigUtil.loadOrAdapt(this, "config.yml");
         ConfigUtil.loadDataFile(this, "ui/inv/orders.yml");
         if (languageUtil != null) languageUtil.loadLanguage(getConfig().getString("language", "en"));
+    }
+
+    public void registerListeners() {
+        getServer().getPluginManager().registerEvents(new GuiListener(), this);
+        getServer().getPluginManager().registerEvents(new OrderSellItems(null, null, null, this), this);
     }
 
     private void init() {

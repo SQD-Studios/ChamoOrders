@@ -28,4 +28,10 @@ public sealed interface SlotType {
 
     record PreviousPage() implements SlotType {
     }
+
+    record DeliverItems() implements SlotType {
+    }
+
+    record OpenDeliverUi() implements SlotType {
+    }
 }

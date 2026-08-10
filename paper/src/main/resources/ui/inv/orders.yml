@@ -1,2 +1,27 @@
 title: "Orders (Page {page})"
 size: 81
+slots:
+  nextpage:
+    slot: 46
+    type: NextPage
+    material: GREEN_STAINED_GLASS_PANE
+    name: "<b><green>Next Page"
+    lore:
+      -
+  lastpage:
+    slot: 54
+    type: LastPage
+    material: RED_STAINED_GLASS_PANE
+    name: "<b><red>Previous Page"
+    lore:
+      -
+  filter:
+    slot: 47
+    type: FilterSlot
+    material: EMERALD
+    name: <white>Filter
+    lore:
+      - "<light_gray>Click to change"
+      - ""
+      - "<white>- {most_per_item}"
+      - "<white>- {most_paid}"

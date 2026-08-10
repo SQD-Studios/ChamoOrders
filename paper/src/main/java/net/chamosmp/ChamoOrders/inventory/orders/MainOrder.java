@@ -54,7 +54,7 @@ public class MainOrder implements GuiListener.ChamoGui {
 
         this.player = player;
         this.plugin = plugin;
-        this.slots = parseSlots(ordersConfig);
+        this.slots = parseSlots(ordersConfig.getConfigurationSection("slots"));
         this.dialogUtil = dialogUtil;
 
         Set<Integer> reserved = new HashSet<>();
@@ -158,7 +158,7 @@ public class MainOrder implements GuiListener.ChamoGui {
 
         Order order = orderMap.get(slot);
         if (order != null) {
-            new OrderSellItems(player, order, plugin).open();
+            new OrderSellItems(player, order, this, plugin).open();
         }
     }
 
@@ -182,7 +182,7 @@ public class MainOrder implements GuiListener.ChamoGui {
         return inventory;
     }
 
-    private List<GuiSlotDef> parseSlots(ConfigurationSection section) {
+    public List<GuiSlotDef> parseSlots(ConfigurationSection section) {
         List<GuiSlotDef> slotsList = new ArrayList<>();
         if (section == null) return slotsList;
         for (String key : section.getKeys(false)) {
@@ -210,6 +210,8 @@ public class MainOrder implements GuiListener.ChamoGui {
             case "SEARCHSLOT" -> new SlotType.SearchSlot();
             case "PREVIOUSPAGE" -> new SlotType.PreviousPage();
             case "NEXTPAGE" -> new SlotType.NextPage();
+            case "DELIVERITEMS" -> new SlotType.DeliverItems();
+            case "OPENDELIVERUI" -> new SlotType.OpenDeliverUi();
             default -> new SlotType.Decorative();
         };
     }
