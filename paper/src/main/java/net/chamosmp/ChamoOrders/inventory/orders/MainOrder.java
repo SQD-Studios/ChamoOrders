@@ -2,15 +2,15 @@ package net.chamosmp.ChamoOrders.inventory.orders;
 
 import net.chamosmp.ChamoOrders.ChamoOrdersPlugin;
 import net.chamosmp.ChamoOrders.api.obj.Order;
-import net.chamosmp.ChamoOrders.inventory.GuiFillerUtil;
-import net.chamosmp.ChamoOrders.inventory.GuiListener;
-import net.chamosmp.ChamoOrders.inventory.GuiMultiPageUtil;
 import net.chamosmp.ChamoOrders.inventory.config.GuiSlotDef;
 import net.chamosmp.ChamoOrders.inventory.config.SlotType;
-import net.chamosmp.ChamoOrders.util.ConfigUtil;
-import net.chamosmp.ChamoOrders.util.DialogUtil;
-import net.chamosmp.ChamoOrders.util.MessageUtil;
-import net.chamosmp.ChamoOrders.util.SchedulerUtil;
+import net.chamosmp.sqdlib.paper.chamogui.GuiFillerUtil;
+import net.chamosmp.sqdlib.paper.chamogui.GuiPaginationUtil;
+import net.chamosmp.sqdlib.paper.chamogui.listener.GuiListener;
+import net.chamosmp.sqdlib.paper.dialog.SimpleDialog;
+import net.chamosmp.sqdlib.paper.util.ColorUtil;
+import net.chamosmp.sqdlib.paper.util.ConfigUtil;
+import net.chamosmp.sqdlib.paper.util.SchedulerUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -31,7 +31,7 @@ public class MainOrder implements GuiListener.ChamoGui {
 
     private Inventory inventory;
     private final List<GuiSlotDef> slots;
-    private final GuiMultiPageUtil<Order> pagination;
+    private final GuiPaginationUtil<Order> pagination;
     private final Map<Integer, Order> orderMap = new HashMap<>();
 
 
@@ -44,12 +44,12 @@ public class MainOrder implements GuiListener.ChamoGui {
 
     private final Player player;
     private final ChamoOrdersPlugin plugin;
-    private final DialogUtil dialogUtil;
+    private final SimpleDialog dialogUtil;
 
     private int PAGE_NEXT;
     private int PAGE_PREV;
 
-    public MainOrder(Player player, ChamoOrdersPlugin plugin, DialogUtil dialogUtil) {
+    public MainOrder(Player player, ChamoOrdersPlugin plugin, SimpleDialog dialogUtil) {
         this.ordersConfig = ConfigUtil.loadOrAdapt(plugin, "ui/inv/orders.yml");
 
         this.player = player;
@@ -63,12 +63,19 @@ public class MainOrder implements GuiListener.ChamoGui {
                 reserved.add(def.slot());
             }
         }
-        this.pagination = new GuiMultiPageUtil<>(
+        this.pagination = new GuiPaginationUtil<>(
                 inventory.getSize(),
                 this::isBorderSlot,
                 reserved
         );
-        this.inventory = Bukkit.createInventory(null, ordersConfig.getInt("size"), MessageUtil.parse(null, ordersConfig.getString("title", "Orders"), Map.of("page", pagination.getCurrentPage())));
+        this.inventory = Bukkit.createInventory(
+                this,
+                ordersConfig.getInt("size"),
+                ColorUtil.parse(
+                        null,
+                        ordersConfig.getString("title", "Orders"),
+                        Map.of("page", "") // TODO Get the current page
+                ));
 
         this.searchDialog = ConfigUtil.loadDataFile(plugin, "ui/dialog/search-dialog.yml");
 
@@ -130,17 +137,17 @@ public class MainOrder implements GuiListener.ChamoGui {
         if (searchSlot == slot) {
             refresh();
             if (!isSearching) {
-                dialogUtil.getInput(searchDialog.getRichMessage("title", MessageUtil.parse("Search:")), player, "selectionsearch", searchDialog.getRichMessage("content", MessageUtil.parse("Search")), input -> {
-                    if (input == null) {
-                        isSearching = false;
-                        return;
-                    }
-                    search = input;
-                    isSearching = true;
-                    refresh();
-                    SchedulerUtil.runForEntity(plugin, player, () -> player.openInventory(inventory), () -> {
-                    });
-                });
+                dialogUtil.getInput(searchDialog.getRichMessage("title", ColorUtil.parse("Search:")), player, "selectionsearch", searchDialog.getRichMessage("content", ColorUtil.parse("Search")), search,
+                        input -> {
+                            if (input == null) {
+                                isSearching = false;
+                                return;
+                            }
+                            search = input;
+                            isSearching = true;
+                            refresh();
+                            open();
+                        });
             } else {
                 isSearching = false;
                 search = null;
@@ -171,10 +178,7 @@ public class MainOrder implements GuiListener.ChamoGui {
 
     public void open(String search) {
         this.search = search;
-        SchedulerUtil.runForEntity(plugin, player, () -> {
-            player.openInventory(inventory);
-        }, () -> {
-        });
+        open();
     }
 
     @Override
@@ -241,10 +245,10 @@ public class MainOrder implements GuiListener.ChamoGui {
             String safeSearch = search == null ? "Nothing" : search;
             Map<String, String> placeholders = Map.of("search", safeSearch);
 
-            meta.customName(MessageUtil.parse(player, def.name(), Map.of()));
-            List<String> lore = new ArrayList<>(MessageUtil.placeholder(def.lore(), placeholders));
+            meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
+            List<String> lore = new ArrayList<>(ColorUtil.placeholder(def.lore(), placeholders));
 
-            meta.lore(lore.stream().map(l -> MessageUtil.parse(player, l, Map.of())).toList());
+            meta.lore(lore.stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
             item.setItemMeta(meta);
         }
         searchSlot = def.slot();
@@ -256,8 +260,8 @@ public class MainOrder implements GuiListener.ChamoGui {
             ItemStack item = new ItemStack(def.material());
             var meta = item.getItemMeta();
             if (meta != null) {
-                meta.customName(MessageUtil.parse(player, def.name(), Map.of()));
-                meta.lore(def.lore().stream().map(l -> MessageUtil.parse(player, l, Map.of())).toList());
+                meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
+                meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
                 if (def.glow()) {
                     meta.setEnchantmentGlintOverride(true);
                 }
@@ -274,12 +278,12 @@ public class MainOrder implements GuiListener.ChamoGui {
         if (meta != null) {
             Map<?, ?> placeholders = Map.of("material", def.orderItem().material().toString(), "price", def.pricePerItem(), "delivered", def.delivered(), "amount", def.amount());
 
-            Component name = MessageUtil.parse(null, plugin.getConfig().getString("inventory.order-items.name", def.orderItem().material().toString()), placeholders);
+            Component name = ColorUtil.parse(null, plugin.getConfig().getString("inventory.order-items.name", def.orderItem().material().toString()), placeholders);
             meta.customName(name);
 
             List<Component> lore = new ArrayList<>();
             for (String i : plugin.getConfig().getStringList("inventory.order-items.lore")) {
-                lore.add(MessageUtil.parse(null, i, placeholders));
+                lore.add(ColorUtil.parse(null, i, placeholders));
             }
             meta.lore(lore);
         }
@@ -291,10 +295,10 @@ public class MainOrder implements GuiListener.ChamoGui {
         ItemStack item = new ItemStack(def.material());
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.customName(MessageUtil.parse(def.name()));
+            meta.customName(ColorUtil.parse(def.name()));
             List<Component> loreList = new ArrayList<>();
             for (String lore : def.lore()) {
-                loreList.add(MessageUtil.parse(lore));
+                loreList.add(ColorUtil.parse(lore));
             }
             meta.lore(loreList);
             meta.setEnchantmentGlintOverride(def.glow());

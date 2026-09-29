@@ -22,6 +22,10 @@ allprojects {
             name = "eldonexus"
             url = uri("https://eldonexus.de/repository/maven-public/")
         } // StrokkCommands
+        maven {
+            name = "chamosmpRepoReleases"
+            url = uri("https://maven.chamosmp.net/releases")
+        }
     }
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(25))

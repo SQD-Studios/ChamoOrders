@@ -1,6 +1,7 @@
 package net.chamosmp.ChamoOrders.util;
 
 import net.chamosmp.ChamoOrders.ChamoOrdersPlugin;
+import net.chamosmp.sqdlib.paper.util.ColorUtil;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
@@ -118,9 +119,9 @@ public class EconomyUtil {
         @Deprecated
         public Component getMessage() {
             if (success) {
-                return MessageUtil.parse("<green>" + message + "</green>");
+                return ColorUtil.parse("<green>" + message + "</green>");
             } else {
-                return MessageUtil.parse("<red>" + message + "</red>");
+                return ColorUtil.parse("<red>" + message + "</red>");
             }
         }
 
@@ -131,7 +132,7 @@ public class EconomyUtil {
         public enum Where {
             WITHDRAW,
             DEPOSIT,
-            BOTH;
+            BOTH
         }
     }
 }

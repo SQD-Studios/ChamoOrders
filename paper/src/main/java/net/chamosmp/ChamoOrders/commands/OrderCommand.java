@@ -5,10 +5,9 @@ import io.papermc.paper.command.brigadier.BasicCommand;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import net.chamosmp.ChamoOrders.ChamoOrdersPlugin;
 import net.chamosmp.ChamoOrders.inventory.orders.MainOrder;
-import net.chamosmp.ChamoOrders.util.DialogUtil;
-import net.chamosmp.ChamoOrders.util.LoggerUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import net.chamosmp.sqdlib.paper.dialog.SimpleDialog;
+import net.chamosmp.sqdlib.paper.util.LoggerUtil;
+import net.chamosmp.sqdlib.util.log.LogType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
@@ -16,16 +15,14 @@ import org.jspecify.annotations.NonNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class OrderCommand implements BasicCommand {
 
     private final ChamoOrdersPlugin plugin;
-    private final DialogUtil dialogUtil;
+    private final SimpleDialog dialogUtil;
 
-    public OrderCommand(ChamoOrdersPlugin plugin, DialogUtil dialogUtil) {
+    public OrderCommand(ChamoOrdersPlugin plugin, SimpleDialog dialogUtil) {
         this.plugin = plugin;
         this.dialogUtil = dialogUtil;
     }
@@ -36,7 +33,7 @@ public class OrderCommand implements BasicCommand {
         try {
             player = commandSourceStack.getPlayerOrThrow();
         } catch (CommandSyntaxException e) {
-            LoggerUtil.log(LoggerUtil.LogType.INFO, "Only players can execute this command!");
+            LoggerUtil.log(LogType.INFO, "Only players can execute this command!");
             return;
         }
         if (args.length == 0) {

@@ -5,20 +5,18 @@ import net.chamosmp.ChamoOrders.ChamoOrdersPlugin;
 import net.chamosmp.ChamoOrders.api.obj.Order;
 import net.chamosmp.ChamoOrders.inventory.config.GuiSlotDef;
 import net.chamosmp.ChamoOrders.inventory.config.SlotType;
-import net.chamosmp.ChamoOrders.util.ConfigUtil;
-import net.chamosmp.ChamoOrders.util.MessageUtil;
-import net.chamosmp.ChamoOrders.util.SchedulerUtil;
+import net.chamosmp.sqdlib.paper.chamogui.listener.GuiListener;
+import net.chamosmp.sqdlib.paper.util.ColorUtil;
+import net.chamosmp.sqdlib.paper.util.ConfigUtil;
+import net.chamosmp.sqdlib.paper.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class OrderSellItems implements Listener {
+public class OrderSellItems implements GuiListener.ChamoGui {
 
-    private YamlConfiguration config;
+    private final YamlConfiguration config;
     private List<GuiSlotDef> slots;
 
     private int deliverItemsSlot = -10;
@@ -37,14 +35,14 @@ public class OrderSellItems implements Listener {
 
     private Inventory inventory;
 
-    private Order order;
-    private Player player;
+    private final Order order;
+    private final Player player;
 
     private final ChamoOrdersPlugin plugin;
 
     private List<ItemStack> items;
     private List<ItemStack> allItems;
-    private List<Integer> pluginItems = new ArrayList<>();
+    private final List<Integer> pluginItems = new ArrayList<>();
 
     public OrderSellItems(Player player, Order order, @Nullable MainOrder mainOrder, ChamoOrdersPlugin plugin) {
         this.config = ConfigUtil.loadDataFile(plugin, "ui/inv/sellorders.yml");
@@ -55,7 +53,7 @@ public class OrderSellItems implements Listener {
         this.player = player;
         this.order = order;
         this.plugin = plugin;
-        this.inventory = Bukkit.createInventory(null, config.getInt("size"), MessageUtil.parse(config.getString("title", "Deliver Items")));
+        this.inventory = Bukkit.createInventory(this, config.getInt("size"), ColorUtil.parse(config.getString("title", "Deliver Items")));
 
         refresh();
     }
@@ -117,28 +115,13 @@ public class OrderSellItems implements Listener {
         }
     }
 
-    @EventHandler
-    public void onClick(InventoryClickEvent event) {
-        if (event.getInventory().getHolder() instanceof OrderSellItems gui) {
-            event.setCancelled(true);
-            gui.handleClick(event);
-        }
-    }
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent event) {
-        if (event.getInventory().getHolder() instanceof OrderSellItems gui) {
-            gui.handleClose(event);
-        }
-    }
-
     private @NotNull ItemStack createStaticItem(@NotNull GuiSlotDef def) {
         if (def.material() != null) {
             ItemStack item = new ItemStack(def.material());
             var meta = item.getItemMeta();
             if (meta != null) {
-                meta.customName(MessageUtil.parse(player, def.name(), Map.of()));
-                meta.lore(def.lore().stream().map(l -> MessageUtil.parse(player, l, Map.of())).toList());
+                meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
+                meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
                 if (def.glow()) {
                     meta.setEnchantmentGlintOverride(true);
                 }
@@ -147,5 +130,10 @@ public class OrderSellItems implements Listener {
             return item;
         }
         return new ItemStack(Material.BARRIER);
+    }
+
+    @Override
+    public @NotNull Inventory getInventory() {
+        return inventory;
     }
 }

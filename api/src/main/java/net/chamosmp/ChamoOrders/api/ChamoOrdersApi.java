@@ -1,4 +1,4 @@
 package net.chamosmp.ChamoOrders.api;
 
-public interface ChamoOrders {
+public interface ChamoOrdersApi {
 }

@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    implementation("net.chamosmp.sqdlib:sqdlib-paper:3.1.1")
 
     compileOnly("net.strokkur.commands:annotations-paper:2.1.4")
     annotationProcessor("net.strokkur.commands:processor-paper:2.1.4")
@@ -46,5 +47,6 @@ tasks {
     shadowJar {
         configurations = project.configurations.runtimeClasspath.map { setOf(it) }
         relocate("dev.faststats", "net.chamosmp.chamoorders.libs.faststats")
+        relocate("net.chamosmp.sqdlib", "net.chamosmp.chamoorders.libs.sqdlib")
     }
 }
