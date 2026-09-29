@@ -16,7 +16,7 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.12.3")
 
     compileOnly("com.zaxxer:HikariCP:7.1.0")
-    implementation("dev.faststats.metrics:bukkit:0.22.0")
+    implementation("dev.faststats.metrics:bukkit:0.30.1")
 
     implementation(project(":api"))
 }
