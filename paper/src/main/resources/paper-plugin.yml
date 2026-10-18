@@ -1,8 +1,10 @@
 name: ChamoOrders
+authors: ["SQD Studios"]
+website: "https://github.com/SQD-Studios/ChamoOrders"
 version: '${version}'
 
-main: net.chamosmp.ChamoOrders.ChamoOrdersPlugin
-loader: net.chamosmp.ChamoOrders.ChamoOrdersLoader
+main: com.sqdstudios.chamoorders.ChamoOrdersPlugin
+loader: com.sqdstudios.chamoorders.ChamoOrdersLoader
 api-version: '1.21.11'
 
 folia-supported: true

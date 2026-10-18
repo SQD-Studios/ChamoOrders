@@ -1,22 +1,22 @@
 plugins {
-    id("com.gradleup.shadow") version "9.6.1"
-    id("xyz.jpenilla.run-paper") version "3.1.0"
+    id("shared")
+
+    alias(libs.plugins.shadowjar)
+    alias(libs.plugins.run.paper)
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
-    implementation("net.chamosmp.sqdlib:sqdlib-paper:3.1.1")
+    compileOnly(libs.paper)
+    implementation(libs.sqdlib.paper)
 
-    compileOnly("net.strokkur.commands:annotations-paper:2.1.4")
-    annotationProcessor("net.strokkur.commands:processor-paper:2.1.4")
+    compileOnly(libs.strokk.paper)
+    annotationProcessor(libs.strokk.paper.proccesor)
 
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
-        exclude("org.bukkit", "bukkit")
-    }
-    compileOnly("me.clip:placeholderapi:2.12.3")
+    compileOnly(libs.vault)
+    compileOnly(libs.placeholderapi)
 
-    compileOnly("com.zaxxer:HikariCP:7.1.0")
-    implementation("dev.faststats.metrics:bukkit:0.22.0")
+    compileOnly(libs.hikaricp)
+    implementation(libs.faststats)
 
     implementation(project(":api"))
 }
@@ -30,7 +30,7 @@ tasks {
             modrinth("lKEzGugV", "2.12.3") // PlaceholderAPI
             modrinth("Vebnzrzj", "v5.5.53-bukkit") // Luckperms
         }
-        minecraftVersion("26.2")
+        minecraftVersion("26.3")
     }
     runPaper.folia.registerTask()
 
@@ -46,7 +46,7 @@ tasks {
 
     shadowJar {
         configurations = project.configurations.runtimeClasspath.map { setOf(it) }
-        relocate("dev.faststats", "net.chamosmp.chamoorders.libs.faststats")
-        relocate("net.chamosmp.sqdlib", "net.chamosmp.chamoorders.libs.sqdlib")
+        relocate("dev.faststats", "com.sqdstudios.chamoorders.libs.faststats")
+        relocate("com.sqdstudios.sqdlib", "com.sqdstudios.chamoorders.libs.sqdlib")
     }
 }

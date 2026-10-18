@@ -1,3 +1,7 @@
+plugins {
+    id("shared")
+}
+
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    compileOnly(libs.paper)
 }

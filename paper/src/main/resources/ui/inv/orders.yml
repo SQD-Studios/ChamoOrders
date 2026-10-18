@@ -1,27 +1,35 @@
-title: "Orders (Page {page})"
-size: 81
+title: "Orders (Page %page%)"
+size: 54
 slots:
-  nextpage:
+  yourordergui:
     slot: 46
+    type: OpenYourOrderGui
+    material: CHEST
+    name: "<white>Your Orders"
+    lore:
+      -
+
+  nextpage:
+    slot: 53
     type: NextPage
     material: GREEN_STAINED_GLASS_PANE
     name: "<b><green>Next Page"
     lore:
       -
   lastpage:
-    slot: 54
+    slot: 52
     type: LastPage
     material: RED_STAINED_GLASS_PANE
     name: "<b><red>Previous Page"
     lore:
       -
   filter:
-    slot: 47
+    slot: 45
     type: FilterSlot
     material: EMERALD
     name: <white>Filter
     lore:
-      - "<light_gray>Click to change"
+      - "<gray>Click to change"
       - ""
-      - "<white>- {most_per_item}"
-      - "<white>- {most_paid}"
+      - "<white>- %most_per_item%"
+      - "<white>- %most_paid%"

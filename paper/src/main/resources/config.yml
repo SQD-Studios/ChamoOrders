@@ -59,10 +59,10 @@ filler: # Fill your GUI's empty slots into filler items. Currently works on guis
 
 inventory:
   order-items:
-    name: "{material}"
+    name: "%material%"
     lore:
       - ""
-      - "<dark_gray>{price} each"
-      - "<dark_gray>{delivered}/{amount} Delivered"
+      - "<dark_gray>%price% each"
+      - "<dark_gray>%delivered%/%amount% Delivered"
 
 # Configuration Done! Such a small config

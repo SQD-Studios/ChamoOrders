@@ -1,0 +1,35 @@
+[versions]
+
+run-task = "3.1.0"
+shadow = "9.6.1"
+
+strokk-commands = "2.3.1"
+
+paper-api = "26.3.build.+"
+sqdlib = "4.0.0"
+
+vault = "1.7.1"
+placeholderapi = "2.12.3"
+
+hikaricp = "7.1.0"
+faststats = "0.22.0"
+
+[libraries]
+
+paper = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
+sqdlib-paper = { module = "com.sqdstudios.sqdlib:sqdlib-paper", version.ref = "sqdlib" }
+
+vault = { module = "com.github.MilkBowl:VaultAPI", version.ref = "vault" }
+placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
+
+strokk-paper = { module = "net.strokkur.commands:annotations-paper", version.ref = "strokk-commands" }
+strokk-paper-proccesor = { module = "net.strokkur.commands:processor-paper", version.ref = "strokk-commands" }
+
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+faststats = { module = "dev.faststats.metrics:bukkit", version.ref = "faststats" }
+
+[plugins]
+
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-task" }
+
+shadowjar = { id = "com.gradleup.shadow", version.ref = "shadow" }
