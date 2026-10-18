@@ -8,6 +8,13 @@ slots:
     name: "<white>Your Orders"
     lore:
       -
+  search:
+    slot: 46
+    type: SearchSlot
+    material: HOPPER
+    name: "<red>Search"
+    lore:
+      -  "<dark_gray>Currently searching: <dark_red>%search%"
 
   nextpage:
     slot: 53
@@ -31,5 +38,5 @@ slots:
     lore:
       - "<gray>Click to change"
       - ""
-      - "<white>- %most_per_item%"
-      - "<white>- %most_paid%"
+      - "<white> %most_per_item%"
+      - "<white> %most_paid%"

@@ -31,7 +31,7 @@ public class OrderCommand implements BasicCommand {
     }
 
     @Override
-    public void execute(CommandSourceStack commandSourceStack, String[] args) {
+    public void execute(CommandSourceStack commandSourceStack, String @NonNull [] args) {
         Player player;
         try {
             player = commandSourceStack.getPlayerOrThrow();

@@ -13,6 +13,7 @@ import io.papermc.paper.registry.RegistryKey;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.Plugin;
@@ -77,7 +78,8 @@ public class MySQL implements DatabaseManager {
                             amount INT NOT NULL,
                             delivered INT NOT NULL,
                             material TEXT NOT NULL,
-                            enchantments TEXT NOT NULL
+                            enchantments TEXT NOT NULL,
+                            order_uuid  VARCHAR(36) NOT NULL,
                         )""");
             } catch (SQLException e) {
                 LoggerUtil.log(LogType.WARNING, "Could not execute after connection sql to the database: " + e);
@@ -118,7 +120,8 @@ public class MySQL implements DatabaseManager {
                                     rs.getDouble("price_per_item"),
                                     rs.getInt("amount"),
                                     rs.getInt("delivered"),
-                                    Bukkit.getOfflinePlayer(UUID.fromString(rs.getString("player_uuid")))
+                                    Bukkit.getOfflinePlayer(UUID.fromString(rs.getString("player_uuid"))),
+                                    UUID.fromString(rs.getString("order_uuid"))
                             ));
                         } catch (IllegalArgumentException e) {
                             LoggerUtil.log(LogType.WARNING, "Could not get the material or player UUID from the database: " + e);
@@ -160,6 +163,49 @@ public class MySQL implements DatabaseManager {
             } catch (SQLException e) {
                 LoggerUtil.log(LogType.WARNING, "Could not execute database query: " + e);
             }
+        });
+    }
+
+    @Override
+    public CompletableFuture<List<@NonNull Order>> getPlayerOrders(OfflinePlayer offlinePlayer) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<Order> orders = new ArrayList<>();
+            try (Connection conn = dataSource.getConnection();
+                 PreparedStatement ps = conn.prepareStatement("""
+                         SELECT * FROM current_orders where player_uuid = ?
+                         """)) {
+                ps.setString(1, offlinePlayer.getUniqueId().toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        try {
+                            List<Map<String, Integer>> raw = gson.fromJson(rs.getString("enchantments"), OrderItem.getGsonEnchantmentType());
+                            List<Map<Enchantment, Integer>> enchantments = raw.stream()
+                                    .map(m -> m.entrySet().stream().collect(
+                                            Collectors.toMap(e -> RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(Key.key(e.getKey())), Map.Entry::getValue)))
+
+                                    .toList();
+
+                            orders.add(new Order(
+                                    new OrderItem(
+                                            Material.valueOf(rs.getString("material")),
+                                            enchantments
+                                    ),
+                                    rs.getDouble("price_per_item"),
+                                    rs.getInt("amount"),
+                                    rs.getInt("delivered"),
+                                    Bukkit.getOfflinePlayer(UUID.fromString(rs.getString("player_uuid"))),
+                                    UUID.fromString(rs.getString("order_uuid"))
+                            ));
+                        } catch (IllegalArgumentException e) {
+                            LoggerUtil.log(LogType.WARNING, "Could not get the material or player UUID from the database: " + e);
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                LoggerUtil.log(LogType.WARNING, "Could not get all the orders from the database");
+            }
+
+            return orders;
         });
     }
 }

@@ -1,0 +1,16 @@
+title: "<dark_gray>Your Orders"
+size: 54
+
+no-permission-for-more-orders:
+  slot: 45
+  material: RED_STAINED_GLASS_PANE
+  name: "<red>You cannot have more orders"
+  lore:
+    -
+
+new-order:
+  slot: 45
+  material: GRAY_STAINED_GLASS_PANE
+  name: "<aqua>Create a new order"
+  lore:
+    -

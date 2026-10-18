@@ -43,7 +43,7 @@ public class MainOrder implements GuiListener.ChamoGui {
 
     private boolean isSearching = false;
     private String search;
-    private int searchSlot = 0;
+    private int searchSlot = -1;
 
     private int page = 1;
 
@@ -56,7 +56,9 @@ public class MainOrder implements GuiListener.ChamoGui {
     private int PAGE_NEXT;
     private int PAGE_PREV;
 
-    private int yourOrderSlot;
+    private int yourOrderSlot = -1;
+
+    private int filterSlot = -1;
 
     public MainOrder(Player player, ChamoOrdersPlugin plugin, DatabaseManager databaseManager, SimpleDialog dialogUtil) {
         this.ordersConfig = ConfigUtil.loadOrAdapt(plugin, "ui/inv/orders.yml");
@@ -111,6 +113,8 @@ public class MainOrder implements GuiListener.ChamoGui {
         inventory.clear();
         orderMap.clear();
 
+        GuiFillerUtil.apply(plugin, inventory, player);
+
         List<Order> pageSkins = pagination.getCurrentPageItems();
         List<Integer> available = pagination.getAvailableSlots();
 
@@ -125,8 +129,6 @@ public class MainOrder implements GuiListener.ChamoGui {
 
         for (GuiSlot def : slots) {
             switch (def.type()) {
-                case CustomSlotTypes.OrderItemSlot _ -> {
-                }
                 case CustomSlotTypes.SearchSlot _ -> inventory.setItem(def.slot(), createSearchItem(def));
                 case SlotType.NextPage _ -> {
                     if (pagination.hasNext()) {
@@ -140,12 +142,17 @@ public class MainOrder implements GuiListener.ChamoGui {
                         PAGE_PREV = def.slot();
                     }
                 }
-                case CustomSlotTypes.OpenYourOrderGui _ -> yourOrderSlot = def.slot();
+                case CustomSlotTypes.OpenYourOrderGui _ -> {
+                    yourOrderSlot = def.slot();
+                    inventory.setItem(def.slot(), createStaticItem(def));
+                }
+                case CustomSlotTypes.FilterSlot _ -> {
+                    filterSlot = def.slot();
+                    inventory.setItem(def.slot(), createFilterItem(def));
+                }
                 default -> inventory.setItem(def.slot(), createStaticItem(def));
             }
         }
-
-        GuiFillerUtil.apply(plugin, inventory, player);
     }
 
     @Override
@@ -201,7 +208,7 @@ public class MainOrder implements GuiListener.ChamoGui {
         }
 
         if (slot == yourOrderSlot) {
-            new YourOrders(plugin, player).open();
+            new YourOrders(plugin, player, this, databaseManager).open();
         }
 
         Order order = orderMap.get(slot);
@@ -257,6 +264,7 @@ public class MainOrder implements GuiListener.ChamoGui {
             case "NEXTPAGE" -> new SlotType.NextPage();
             case "DELIVERITEMS" -> new CustomSlotTypes.DeliverItems();
             case "OPENDELIVERUI" -> new CustomSlotTypes.OpenDeliverUi();
+            case "OPENYOURORDERGUI" -> new CustomSlotTypes.OpenYourOrderGui();
             default -> new SlotType.Decorative();
         };
     }
@@ -303,6 +311,23 @@ public class MainOrder implements GuiListener.ChamoGui {
             if (meta != null) {
                 meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
                 meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
+                if (def.glow()) {
+                    meta.setEnchantmentGlintOverride(true);
+                }
+                item.setItemMeta(meta);
+            }
+            return item;
+        }
+        return new ItemStack(Material.BARRIER);
+    }
+
+    private @NotNull ItemStack createFilterItem(@NotNull GuiSlot def) {
+        if (def.material() != null) {
+            ItemStack item = new ItemStack(def.material());
+            var meta = item.getItemMeta();
+            if (meta != null) {
+                meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
+                meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l, Map.of("most_per_item", "", "", ""))).toList());
                 if (def.glow()) {
                     meta.setEnchantmentGlintOverride(true);
                 }
