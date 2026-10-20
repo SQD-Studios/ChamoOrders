@@ -1,8 +1,8 @@
 package com.sqdstudios.chamoorders.inventory.orders;
 
 import com.sqdstudios.chamoorders.ChamoOrdersPlugin;
+import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.chamoorders.api.model.Order;
-import com.sqdstudios.chamoorders.database.DatabaseManager;
 import com.sqdstudios.chamoorders.inventory.config.CustomSlotTypes;
 import com.sqdstudios.sqdlib.paper.chamogui.GuiFillerUtil;
 import com.sqdstudios.sqdlib.paper.chamogui.GuiPaginationUtil;
@@ -59,6 +59,7 @@ public class MainOrder implements GuiListener.ChamoGui {
     private int yourOrderSlot = -1;
 
     private int filterSlot = -1;
+    private int filterMode = 0;
 
     public MainOrder(Player player, ChamoOrdersPlugin plugin, DatabaseManager databaseManager, SimpleDialog dialogUtil) {
         this.ordersConfig = ConfigUtil.loadOrAdapt(plugin, "ui/inv/orders.yml");

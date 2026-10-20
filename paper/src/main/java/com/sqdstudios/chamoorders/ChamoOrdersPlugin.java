@@ -3,9 +3,9 @@ package com.sqdstudios.chamoorders;
 import com.sqdstudios.chamoorders.api.ChamoOrdersApi;
 import com.sqdstudios.chamoorders.commands.AdminCommandBrigadier;
 import com.sqdstudios.chamoorders.commands.OrderCommand;
-import com.sqdstudios.chamoorders.database.DatabaseManager;
-import com.sqdstudios.chamoorders.database.databases.MySQL;
-import com.sqdstudios.chamoorders.database.databases.SQLite;
+import com.sqdstudios.chamoorders.api.database.DatabaseManager;
+import com.sqdstudios.chamoorders.databases.MySqlDatabase;
+import com.sqdstudios.chamoorders.databases.SqliteDatabase;
 import com.sqdstudios.chamoorders.papi.ChamoOrdersPlaceholderApi;
 import com.sqdstudios.sqdlib.paper.chamogui.listener.GuiListener;
 import com.sqdstudios.sqdlib.paper.dialog.SimpleDialog;
@@ -21,6 +21,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -102,12 +103,17 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrdersApi {
     public void connectDatabase() {
         switch (getConfig().getString("database.type", "sqlite").toLowerCase()) {
             case "mysql":
-                this.databaseManager = new MySQL(this);
+                this.databaseManager = new MySqlDatabase(this);
                 break;
             case "sqlite":
-                this.databaseManager = new SQLite(this);
+                this.databaseManager = new SqliteDatabase(this);
                 break;
         }
         databaseManager.connect();
+    }
+
+    @Override
+    public @NonNull DatabaseManager getDatabaseManager() {
+        return databaseManager;
     }
 }

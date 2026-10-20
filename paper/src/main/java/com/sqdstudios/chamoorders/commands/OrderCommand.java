@@ -2,7 +2,7 @@ package com.sqdstudios.chamoorders.commands;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sqdstudios.chamoorders.ChamoOrdersPlugin;
-import com.sqdstudios.chamoorders.database.DatabaseManager;
+import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.chamoorders.inventory.orders.MainOrder;
 import com.sqdstudios.sqdlib.paper.dialog.SimpleDialog;
 import com.sqdstudios.sqdlib.paper.util.LoggerUtil;

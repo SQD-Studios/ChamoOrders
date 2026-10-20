@@ -1,4 +1,4 @@
-package com.sqdstudios.chamoorders.database;
+package com.sqdstudios.chamoorders.api.database;
 
 import com.sqdstudios.chamoorders.api.model.Order;
 import org.bukkit.OfflinePlayer;
@@ -14,7 +14,9 @@ public interface DatabaseManager {
 
     @NonNull CompletableFuture<@NonNull List<@NonNull Order>> getAllOrders();
 
-    CompletableFuture<Void> addOrder(@NonNull Order order);
+    @NonNull CompletableFuture<Void> addOrder(@NonNull Order order);
 
-    CompletableFuture<List<@NonNull Order>> getPlayerOrders(OfflinePlayer offlinePlayer);
+    @NonNull CompletableFuture<@NonNull List<@NonNull Order>> getPlayerOrders(@NonNull OfflinePlayer offlinePlayer);
+
+    @NonNull CompletableFuture<Void> removeOrder(@NonNull Order order);
 }

@@ -1,9 +1,9 @@
-package com.sqdstudios.chamoorders.database.databases;
+package com.sqdstudios.chamoorders.databases;
 
 import com.google.gson.Gson;
 import com.sqdstudios.chamoorders.api.model.Order;
 import com.sqdstudios.chamoorders.api.model.OrderItem;
-import com.sqdstudios.chamoorders.database.DatabaseManager;
+import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.sqdlib.paper.util.LoggerUtil;
 import com.sqdstudios.sqdlib.util.log.LogType;
 import com.zaxxer.hikari.HikariConfig;
@@ -30,14 +30,14 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class MySQL implements DatabaseManager {
+public class MySqlDatabase implements DatabaseManager {
 
     private final Plugin plugin;
     private final Gson gson;
 
     private HikariDataSource dataSource;
 
-    public MySQL(Plugin plugin) {
+    public MySqlDatabase(Plugin plugin) {
         this.gson = new Gson();
         this.plugin = plugin;
     }
@@ -137,7 +137,7 @@ public class MySQL implements DatabaseManager {
     }
 
     @Override
-    public CompletableFuture<Void> addOrder(@NonNull Order order) {
+    public @NonNull CompletableFuture<Void> addOrder(@NonNull Order order) {
         return CompletableFuture.runAsync(() -> {
             try (Connection conn = dataSource.getConnection();
                  PreparedStatement ps = conn.prepareStatement("""
@@ -167,7 +167,7 @@ public class MySQL implements DatabaseManager {
     }
 
     @Override
-    public CompletableFuture<List<@NonNull Order>> getPlayerOrders(OfflinePlayer offlinePlayer) {
+    public @NonNull CompletableFuture<List<@NonNull Order>> getPlayerOrders(@NonNull OfflinePlayer offlinePlayer) {
         return CompletableFuture.supplyAsync(() -> {
             List<Order> orders = new ArrayList<>();
             try (Connection conn = dataSource.getConnection();
@@ -206,6 +206,21 @@ public class MySQL implements DatabaseManager {
             }
 
             return orders;
+        });
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Void> removeOrder(@NonNull Order order) {
+        return CompletableFuture.runAsync(() -> {
+            try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement("""
+                    DELETE FROM current_orders where player_uuid = ? and order_uuid = ?
+                    """)) {
+                ps.setString(1, order.owner().getUniqueId().toString());
+                ps.setString(2, order.orderUuid().toString());
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                LoggerUtil.log(LogType.WARNING, "Could not execute database query: " + e);
+            }
         });
     }
 }

@@ -1,7 +1,7 @@
 package com.sqdstudios.chamoorders.inventory.orders;
 
 import com.sqdstudios.chamoorders.api.model.Order;
-import com.sqdstudios.chamoorders.database.DatabaseManager;
+import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.sqdlib.paper.chamogui.GuiFillerUtil;
 import com.sqdstudios.sqdlib.paper.chamogui.config.GuiSlot;
 import com.sqdstudios.sqdlib.paper.chamogui.config.SlotType;
