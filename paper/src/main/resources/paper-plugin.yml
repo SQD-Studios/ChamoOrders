@@ -1,5 +1,5 @@
 name: ChamoOrders
-authors: ["SQD Studios"]
+authors: [ "SQD Studios" ]
 website: "https://github.com/SQD-Studios/ChamoOrders"
 version: '${version}'
 
@@ -22,17 +22,16 @@ dependencies:
 
 permissions:
   chamoparty.order:
-    default: not op
-    description: "This permission allows using /order"
-    children:
-      permission.node.child: true
+    default: true
+
   chamoorders.admin:
     default: op
     description: "Allows using the admin commands"
     children:
-      permission.node.child: true
-  chamoorders.admin.reload:
-    default: op
-    description: "Allows using /reload"
-    children:
-      permission.node.child: true
+      chamoorders.admin.reload: true
+
+  chamoorders.orderlimit.<limit>:
+    default: false
+
+  chamoorders.orderlimit.8:
+    default: true

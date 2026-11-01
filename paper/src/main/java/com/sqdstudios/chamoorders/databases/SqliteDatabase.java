@@ -1,9 +1,9 @@
 package com.sqdstudios.chamoorders.databases;
 
 import com.google.gson.Gson;
+import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.chamoorders.api.model.Order;
 import com.sqdstudios.chamoorders.api.model.OrderItem;
-import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.sqdlib.paper.util.LoggerUtil;
 import com.sqdstudios.sqdlib.util.log.LogType;
 import com.zaxxer.hikari.HikariConfig;
@@ -23,12 +23,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class SqliteDatabase implements DatabaseManager {
 
@@ -64,7 +60,7 @@ public class SqliteDatabase implements DatabaseManager {
                             delivered INT NOT NULL,
                             material TEXT NOT NULL,
                             enchantments TEXT NOT NULL,
-                            order_uuid  VARCHAR(36) NOT NULL,
+                            order_uuid  VARCHAR(36) NOT NULL
                         )""");
             } catch (SQLException e) {
                 LoggerUtil.log(LogType.WARNING, "Could not execute after connection sql to the database: " + e);
@@ -90,12 +86,12 @@ public class SqliteDatabase implements DatabaseManager {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         try {
-                            List<Map<String, Integer>> raw = gson.fromJson(rs.getString("enchantments"), OrderItem.getGsonEnchantmentType());
-                            List<Map<Enchantment, Integer>> enchantments = raw.stream()
-                                    .map(m -> m.entrySet().stream().collect(
-                                            Collectors.toMap(e -> RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(Key.key(e.getKey())), Map.Entry::getValue)))
-
-                                    .toList();
+                            Map<String, Integer> raw = gson.fromJson(rs.getString("enchantments"), OrderItem.getGsonEnchantmentType());
+                            Map<Enchantment, Integer> enchantments = new HashMap<>();
+                            raw.forEach((key, value) -> enchantments.put(
+                                    RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(Key.key(key)),
+                                    value
+                            ));
 
                             orders.add(new Order(
                                     new OrderItem(
@@ -137,10 +133,11 @@ public class SqliteDatabase implements DatabaseManager {
 
                 ps.setString(5, order.orderItem().material().key().asString());
 
-                List<Map<String, Integer>> plain = order.orderItem().enchantments().stream()
-                        .map(m -> m.entrySet().stream().collect(
-                                Collectors.toMap(e -> e.getKey().key().asString(), Map.Entry::getValue)))
-                        .toList();
+                Map<String, Integer> plain = new HashMap<>();
+                order.orderItem().enchantments().forEach((key, value) -> plain.put(
+                        key.getKey().key().asString(),
+                        value
+                ));
 
                 ps.setString(6, gson.toJson(plain));
 
@@ -163,12 +160,12 @@ public class SqliteDatabase implements DatabaseManager {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         try {
-                            List<Map<String, Integer>> raw = gson.fromJson(rs.getString("enchantments"), OrderItem.getGsonEnchantmentType());
-                            List<Map<Enchantment, Integer>> enchantments = raw.stream()
-                                    .map(m -> m.entrySet().stream().collect(
-                                            Collectors.toMap(e -> RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(Key.key(e.getKey())), Map.Entry::getValue)))
-
-                                    .toList();
+                            Map<String, Integer> raw = gson.fromJson(rs.getString("enchantments"), OrderItem.getGsonEnchantmentType());
+                            Map<Enchantment, Integer> enchantments = new HashMap<>();
+                            raw.forEach((key, value) -> enchantments.put(
+                                    RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(Key.key(key)),
+                                    value
+                            ));
 
                             orders.add(new Order(
                                     new OrderItem(

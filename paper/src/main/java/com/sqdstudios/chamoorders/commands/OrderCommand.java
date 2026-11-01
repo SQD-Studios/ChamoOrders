@@ -1,24 +1,19 @@
 package com.sqdstudios.chamoorders.commands;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sqdstudios.chamoorders.ChamoOrdersPlugin;
 import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.chamoorders.inventory.orders.MainOrder;
 import com.sqdstudios.sqdlib.paper.dialog.SimpleDialog;
-import com.sqdstudios.sqdlib.paper.util.LoggerUtil;
-import com.sqdstudios.sqdlib.util.log.LogType;
-import io.papermc.paper.command.brigadier.BasicCommand;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
+import net.strokkur.commands.Command;
+import net.strokkur.commands.Executes;
+import net.strokkur.commands.paper.Executor;
+import net.strokkur.commands.permission.Permission;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
-
-public class OrderCommand implements BasicCommand {
+@Command("order")
+public class OrderCommand {
 
     private final ChamoOrdersPlugin plugin;
     private final SimpleDialog dialogUtil;
@@ -30,33 +25,9 @@ public class OrderCommand implements BasicCommand {
         this.databaseManager = databaseManager;
     }
 
-    @Override
-    public void execute(CommandSourceStack commandSourceStack, String @NonNull [] args) {
-        Player player;
-        try {
-            player = commandSourceStack.getPlayerOrThrow();
-        } catch (CommandSyntaxException e) {
-            LoggerUtil.log(LogType.INFO, "Only players can execute this command!");
-            return;
-        }
-        if (args.length == 0) {
-            new MainOrder(player, plugin, databaseManager, dialogUtil).open();
-            return;
-        }
-        final String search = String.join(" ", args);
-        new MainOrder(player, plugin, databaseManager, dialogUtil).open(search);
-    }
-
-    @Override
-    public @Nullable String permission() {
-        return "chamoorders.order";
-    }
-
-    @Override
-    public @NonNull Collection<String> suggest(@NonNull CommandSourceStack source, String @NonNull [] args) {
-        if (args.length == 0) {
-            return Collections.singleton("[<search>]");
-        }
-        return List.of();
+    @Executes
+    @Permission("chamoorders.order")
+    public void onExecute(@Executor Player player, Optional<String> search) {
+        new MainOrder(player, plugin, databaseManager, dialogUtil).open(search.orElse(null));
     }
 }

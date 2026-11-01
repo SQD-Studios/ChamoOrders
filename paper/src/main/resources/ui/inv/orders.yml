@@ -2,7 +2,7 @@ title: "Orders (Page %page%)"
 size: 54
 slots:
   yourordergui:
-    slot: 46
+    slot: 47
     type: OpenYourOrderGui
     material: CHEST
     name: "<white>Your Orders"
@@ -25,7 +25,7 @@ slots:
       -
   lastpage:
     slot: 52
-    type: LastPage
+    type: PreviousPage
     material: RED_STAINED_GLASS_PANE
     name: "<b><red>Previous Page"
     lore:

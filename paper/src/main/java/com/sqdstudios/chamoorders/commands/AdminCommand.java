@@ -1,6 +1,8 @@
 package com.sqdstudios.chamoorders.commands;
 
 import com.sqdstudios.chamoorders.ChamoOrdersPlugin;
+import com.sqdstudios.sqdlib.paper.util.LoggerUtil;
+import com.sqdstudios.sqdlib.util.log.LogType;
 import net.strokkur.commands.Aliases;
 import net.strokkur.commands.Command;
 import net.strokkur.commands.Executes;
@@ -25,6 +27,13 @@ public class AdminCommand {
     @Executes("reload")
     @Permission("chamoorders.admin.reload")
     public void reload(CommandSender sender) {
-        plugin.reloadConfig();
+        try {
+            plugin.reloadConfig();
+            sender.sendRichMessage("<green>Successfully reloaded the configurations!");
+        } catch (Exception e) {
+            sender.sendRichMessage("<red>Failed to reload the configurations!");
+            sender.sendRichMessage(e.getMessage());
+            LoggerUtil.log(LogType.SEVERE, e.getMessage());
+        }
     }
 }

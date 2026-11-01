@@ -1,17 +1,22 @@
 package com.sqdstudios.chamoorders.inventory.orders;
 
-import com.sqdstudios.chamoorders.api.model.Order;
 import com.sqdstudios.chamoorders.api.database.DatabaseManager;
+import com.sqdstudios.chamoorders.api.model.Order;
+import com.sqdstudios.chamoorders.api.model.OrderItem;
 import com.sqdstudios.sqdlib.paper.chamogui.GuiFillerUtil;
 import com.sqdstudios.sqdlib.paper.chamogui.config.GuiSlot;
 import com.sqdstudios.sqdlib.paper.chamogui.config.SlotType;
 import com.sqdstudios.sqdlib.paper.chamogui.listener.GuiListener;
+import com.sqdstudios.sqdlib.paper.dialog.SimpleDialog;
 import com.sqdstudios.sqdlib.paper.util.ColorUtil;
 import com.sqdstudios.sqdlib.paper.util.ConfigUtil;
 import com.sqdstudios.sqdlib.paper.util.SchedulerUtil;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -20,9 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class YourOrders implements GuiListener.ChamoGui {
 
@@ -31,6 +34,7 @@ public class YourOrders implements GuiListener.ChamoGui {
     private final ConfigurationSection config;
 
     private final Plugin plugin;
+    private final SimpleDialog simpleDialog;
     private final Player player;
     private final MainOrder mainOrder;
     private final DatabaseManager databaseManager;
@@ -39,8 +43,9 @@ public class YourOrders implements GuiListener.ChamoGui {
 
     private final List<Order> orders = new ArrayList<>();
 
-    public YourOrders(Plugin plugin, Player player, MainOrder mainOrder, DatabaseManager databaseManager) {
+    public YourOrders(Plugin plugin, SimpleDialog simpleDialog, Player player, MainOrder mainOrder, DatabaseManager databaseManager) {
         this.config = ConfigUtil.loadDataFile(plugin, "ui/inv/yourorders.yml");
+        this.simpleDialog = simpleDialog;
 
         this.inventory = Bukkit.createInventory(this, config.getInt("size"), ColorUtil.parse(config.getString("title", "<dark_gray>Your Orders")));
 
@@ -49,13 +54,14 @@ public class YourOrders implements GuiListener.ChamoGui {
         this.mainOrder = mainOrder;
         this.databaseManager = databaseManager;
 
-        databaseManager.getPlayerOrders(player).whenComplete((playerOrders, _) -> orders.addAll(playerOrders));
-
         refresh();
     }
 
     public void refresh() {
         inventory.clear();
+        orders.clear();
+
+        databaseManager.getPlayerOrders(player).whenComplete((playerOrders, _) -> orders.addAll(playerOrders));
 
         GuiFillerUtil.apply(plugin, inventory, player);
 
@@ -74,7 +80,7 @@ public class YourOrders implements GuiListener.ChamoGui {
                 false
         );
 
-        while (howManyOrdersCanHave() + 1 > currentOrderIndex) {
+        while (howManyOrdersCanHave() > currentOrderIndex) {
             slotsCanCreate.add(currentOrderIndex);
             inventory.setItem(currentOrderIndex, createStaticItem(canCreate));
             currentOrderIndex++;
@@ -114,8 +120,58 @@ public class YourOrders implements GuiListener.ChamoGui {
     @Override
     public void handleClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
+
         if (slotsCanCreate.contains(slot)) {
-            // TODO Create a new order
+            SchedulerUtil.runForEntity(plugin, player, () -> {
+                Material material;
+                simpleDialog.getInput(ColorUtil.parse(""), player, "orderamount", ColorUtil.parse(""), null,
+                        stringOrderAmount -> {
+                            try {
+                                int orderAmount = Integer.parseInt(stringOrderAmount);
+
+                                simpleDialog.getInput(ColorUtil.parse(""), player, "priceperitem", ColorUtil.parse(""), null,
+                                        pricePerItemString -> {
+                                            double pricePerItem = Double.parseDouble(pricePerItemString);
+
+                                            List<Enchantment> availableEnchants = new ArrayList<>();
+                                            ItemStack matAsStack = new ItemStack(material);
+
+                                            RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).forEach(
+                                                    enchantment -> {
+                                                        try {
+                                                            matAsStack.addEnchantment(enchantment, 1);
+                                                            availableEnchants.add(enchantment);
+                                                        } catch (Exception _) {
+                                                        }
+                                                    }
+                                            );
+
+                                            Map<Enchantment, Integer> selectedEnchants = new HashMap<>();
+
+                                            OrderItem orderItem = new OrderItem(
+                                                    material,
+                                                    selectedEnchants
+                                            );
+
+                                            Order order = new Order(
+                                                    orderItem,
+                                                    pricePerItem,
+                                                    orderAmount,
+                                                    0,
+                                                    player,
+                                                    UUID.randomUUID()
+                                            );
+                                            databaseManager.addOrder(order);
+                                            refresh();
+                                        });
+
+                            } catch (NumberFormatException e) {
+                                player.closeDialog();
+                                player.closeInventory();
+                                player.sendMessage(ColorUtil.parse("<red>This is not a valid number!"));
+                            }
+                        });
+            }, null);
         }
     }
 

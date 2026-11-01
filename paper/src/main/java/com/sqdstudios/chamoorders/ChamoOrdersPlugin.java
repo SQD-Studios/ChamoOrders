@@ -1,9 +1,9 @@
 package com.sqdstudios.chamoorders;
 
 import com.sqdstudios.chamoorders.api.ChamoOrdersApi;
-import com.sqdstudios.chamoorders.commands.AdminCommandBrigadier;
-import com.sqdstudios.chamoorders.commands.OrderCommand;
 import com.sqdstudios.chamoorders.api.database.DatabaseManager;
+import com.sqdstudios.chamoorders.commands.AdminCommandBrigadier;
+import com.sqdstudios.chamoorders.commands.OrderCommandBrigadier;
 import com.sqdstudios.chamoorders.databases.MySqlDatabase;
 import com.sqdstudios.chamoorders.databases.SqliteDatabase;
 import com.sqdstudios.chamoorders.papi.ChamoOrdersPlaceholderApi;
@@ -22,8 +22,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
-
-import java.util.List;
 
 
 public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrdersApi {
@@ -58,13 +56,14 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrdersApi {
 
         Bukkit.getServicesManager().register(ChamoOrdersApi.class, this, this, ServicePriority.Normal);
 
+        init();
+
         registerCommands();
 
         ConfigUtil.loadOrAdapt(this, "config.yml");
         ConfigUtil.loadDataFile(this, "ui/inv/orders.yml");
         ConfigUtil.loadDataFile(this, "ui/inv/sellorders.yml");
 
-        init();
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new ChamoOrdersPlaceholderApi(this).register();
@@ -87,17 +86,16 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrdersApi {
     }
 
     private void init() {
-        if (languageUtil != null) languageUtil = new LanguageUtil(this);
-        if (dialogUtil != null) dialogUtil = new SimpleDialog(this);
+        if (languageUtil == null) languageUtil = new LanguageUtil(this);
+        if (dialogUtil == null) dialogUtil = new SimpleDialog(this);
     }
 
     private void registerCommands() {
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS.newHandler(event -> {
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,event -> {
             AdminCommandBrigadier.register(event.registrar(), this);
-        }));
-
-        registerCommand("order", "Open the orders gui", List.of("orders"), new OrderCommand(this, dialogUtil, databaseManager));
-        LoggerUtil.log(LogType.INFO, "Successfully registered commands");
+            OrderCommandBrigadier.register(event.registrar(), this, dialogUtil, databaseManager);
+            LoggerUtil.log(LogType.INFO, "Successfully registered commands");
+        });
     }
 
     public void connectDatabase() {

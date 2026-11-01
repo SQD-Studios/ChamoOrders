@@ -11,25 +11,23 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 public record OrderItem(
         Material material,
-        List<Map<Enchantment, Integer>> enchantments
+        Map<Enchantment, Integer> enchantments
 ) {
 
-    private static final Type gsonType = new TypeToken<List<Map<String, Integer>>>() {
+    private static final Type gsonType = new TypeToken<Map<String, Integer>>() {
     }.getType();
 
     public ItemStack getItem() {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        for (Map<Enchantment, Integer> i : enchantments) {
-            for (Enchantment e : i.keySet()) {
-                meta.addEnchant(e, i.get(e), true);
-            }
+
+        for (Enchantment e : enchantments.keySet()) {
+            item.addEnchantment(e, enchantments.get(e));
         }
         item.setItemMeta(meta);
         return item;
@@ -44,11 +42,11 @@ public record OrderItem(
             return false;
         }
 
-        List<Map<Enchantment, Integer>> es = new ArrayList<>();
+        Map<Enchantment, Integer> es = new HashMap<>();
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             for (Enchantment e : meta.getEnchants().keySet()) {
-                es.add(Map.of(e, meta.getEnchants().get(e)));
+                es.put(e, meta.getEnchants().get(e));
             }
         }
 

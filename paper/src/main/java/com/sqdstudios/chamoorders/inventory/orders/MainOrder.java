@@ -24,6 +24,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
@@ -40,10 +41,9 @@ public class MainOrder implements GuiListener.ChamoGui {
     private final GuiPaginationUtil<Order> pagination;
     private final Map<Integer, Order> orderMap = new HashMap<>();
 
+    private final Map<Integer, GuiSlot> slotMap = new HashMap<>();
 
-    private boolean isSearching = false;
     private String search;
-    private int searchSlot = -1;
 
     private int page = 1;
 
@@ -53,17 +53,15 @@ public class MainOrder implements GuiListener.ChamoGui {
     private final ChamoOrdersPlugin plugin;
     private final SimpleDialog dialogUtil;
 
-    private int PAGE_NEXT;
-    private int PAGE_PREV;
-
-    private int yourOrderSlot = -1;
-
-    private int filterSlot = -1;
     private int filterMode = 0;
 
     public MainOrder(Player player, ChamoOrdersPlugin plugin, DatabaseManager databaseManager, SimpleDialog dialogUtil) {
         this.ordersConfig = ConfigUtil.loadOrAdapt(plugin, "ui/inv/orders.yml");
         this.databaseManager = databaseManager;
+        this.player = player;
+        this.plugin = plugin;
+        this.dialogUtil = dialogUtil;
+        this.slots = parseSlots(ordersConfig.getConfigurationSection("slots"));
 
         this.inventory = Bukkit.createInventory(
                 this,
@@ -71,14 +69,10 @@ public class MainOrder implements GuiListener.ChamoGui {
                 ColorUtil.parse(
                         null,
                         ordersConfig.getString("title", "Orders"),
-                        Map.of("page", page) // TODO Get the current page
+                        Map.of("page", page)
                 )
         );
 
-        this.player = player;
-        this.plugin = plugin;
-        this.slots = parseSlots(ordersConfig.getConfigurationSection("slots"));
-        this.dialogUtil = dialogUtil;
 
         Set<Integer> reserved = new HashSet<>();
         for (GuiSlot def : slots) {
@@ -133,88 +127,86 @@ public class MainOrder implements GuiListener.ChamoGui {
                 case CustomSlotTypes.SearchSlot _ -> inventory.setItem(def.slot(), createSearchItem(def));
                 case SlotType.NextPage _ -> {
                     if (pagination.hasNext()) {
-                        inventory.setItem(def.slot(), createNavigationItem(def));
-                        PAGE_NEXT = def.slot();
+                        inventory.setItem(def.slot(), createStaticItem(def));
                     }
                 }
                 case SlotType.PreviousPage _ -> {
-                    if (pagination.hasPrev()) {
-                        inventory.setItem(def.slot(), createNavigationItem(def));
-                        PAGE_PREV = def.slot();
+                    if (page > 1) {
+                        inventory.setItem(def.slot(), createStaticItem(def));
+
                     }
                 }
-                case CustomSlotTypes.OpenYourOrderGui _ -> {
-                    yourOrderSlot = def.slot();
-                    inventory.setItem(def.slot(), createStaticItem(def));
-                }
-                case CustomSlotTypes.FilterSlot _ -> {
-                    filterSlot = def.slot();
-                    inventory.setItem(def.slot(), createFilterItem(def));
-                }
+                case CustomSlotTypes.FilterSlot _ -> inventory.setItem(def.slot(), createFilterItem(def));
                 default -> inventory.setItem(def.slot(), createStaticItem(def));
             }
+
+            slotMap.put(def.slot(), def);
         }
     }
 
     @Override
     public void handleClick(InventoryClickEvent event) {
         int slot = event.getRawSlot();
-        if (searchSlot == slot) {
-            refresh();
-            if (!isSearching) {
-                dialogUtil.getInput(searchDialog.getRichMessage("title", ColorUtil.parse("Search:")), player, "selectionsearch", searchDialog.getRichMessage("content", ColorUtil.parse("Search")), search,
-                        input -> {
-                            if (input == null) {
-                                isSearching = false;
-                                return;
-                            }
-                            search = input;
-                            isSearching = true;
-                            refresh();
-                            open();
-                        });
-            } else {
-                isSearching = false;
-                search = null;
-                refresh();
-                return;
-            }
-        }
-
-        if (slot == PAGE_NEXT && pagination.hasNext()) {
-            pagination.nextPage();
-            page++;
-            this.inventory = Bukkit.createInventory(
-                    this,
-                    ordersConfig.getInt("size"),
-                    ColorUtil.parse(
-                            null,
-                            ordersConfig.getString("title", "Orders"),
-                            Map.of("page", page) // TODO Get the current page
-                    )
-            );
-        }
-        if (slot == PAGE_PREV && pagination.hasPrev()) {
-            pagination.prevPage();
-            page--;
-            this.inventory = Bukkit.createInventory(
-                    this,
-                    ordersConfig.getInt("size"),
-                    ColorUtil.parse(
-                            null,
-                            ordersConfig.getString("title", "Orders"),
-                            Map.of("page", page) // TODO Get the current page
-                    )
-            );
-        }
-
-        if (slot == yourOrderSlot) {
-            new YourOrders(plugin, player, this, databaseManager).open();
-        }
 
         Order order = orderMap.get(slot);
         if (order != null) {
             new OrderSellItems(player, order, this, plugin).open();
+        }
+
+        GuiSlot def = slotMap.get(slot);
+        if (def == null) return;
+
+        switch (def.type()) {
+            case CustomSlotTypes.SearchSlot _ -> {
+                refresh();
+                if (search == null) {
+                    dialogUtil.getInput(searchDialog.getRichMessage("title", ColorUtil.parse("Search:")), player, "selectionsearch", searchDialog.getRichMessage("content", ColorUtil.parse("Search")), search,
+                            input -> {
+                                if (input == null) {
+                                    return;
+                                }
+                                search = input;
+                                refresh();
+                                open();
+                            });
+                } else {
+                    search = null;
+                    refresh();
+                }
+            }
+            case SlotType.NextPage _ -> {
+                if (pagination.hasNext()) {
+                    pagination.nextPage();
+                    page++;
+                    this.inventory = Bukkit.createInventory(
+                            this,
+                            ordersConfig.getInt("size"),
+                            ColorUtil.parse(
+                                    null,
+                                    ordersConfig.getString("title", "Orders"),
+                                    Map.of("page", page)
+                            )
+                    );
+                }
+            }
+            case SlotType.PreviousPage _ -> {
+                if (pagination.hasPrev()) {
+                    pagination.prevPage();
+                    page--;
+                    this.inventory = Bukkit.createInventory(
+                            this,
+                            ordersConfig.getInt("size"),
+                            ColorUtil.parse(
+                                    null,
+                                    ordersConfig.getString("title", "Orders"),
+                                    Map.of("page", page)
+                            )
+                    );
+                }
+            }
+            case CustomSlotTypes.OpenYourOrderGui _ -> new YourOrders(plugin, dialogUtil, player, this, databaseManager).open();
+            default -> {
+            }
         }
     }
 
@@ -225,7 +217,7 @@ public class MainOrder implements GuiListener.ChamoGui {
         });
     }
 
-    public void open(String search) {
+    public void open(@Nullable String search) {
         this.search = search;
         open();
     }
@@ -284,7 +276,7 @@ public class MainOrder implements GuiListener.ChamoGui {
     }
 
     private boolean matchesSearchFilter(@NotNull Order orderItem) {
-        if (search == null || search.isBlank() || !isSearching) return true;
+        if (search == null || search.isBlank()) return true;
         return orderItem.orderItem().searchMaterial(search);
     }
 
@@ -301,24 +293,23 @@ public class MainOrder implements GuiListener.ChamoGui {
             meta.lore(lore.stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
             item.setItemMeta(meta);
         }
-        searchSlot = def.slot();
         return item;
     }
 
     private @NotNull ItemStack createStaticItem(@NotNull GuiSlot def) {
         if (def.material() != null) {
-            ItemStack item = new ItemStack(def.material());
+            ItemStack item = ItemStack.of(def.material());
             var meta = item.getItemMeta();
-            if (meta != null) {
-                meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
-                meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
-                if (def.glow()) {
-                    meta.setEnchantmentGlintOverride(true);
-                }
-                item.setItemMeta(meta);
-            }
+            meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
+            meta.lore(
+                    def.lore().stream().map(l -> ColorUtil.parse(player, l)).toList()
+            );
+            meta.setEnchantmentGlintOverride(def.glow());
+            item.setItemMeta(meta);
+
             return item;
         }
+
         return new ItemStack(Material.BARRIER);
     }
 
@@ -355,22 +346,6 @@ public class MainOrder implements GuiListener.ChamoGui {
             meta.lore(lore);
         }
 
-        return item;
-    }
-
-    private @NotNull ItemStack createNavigationItem(@NotNull GuiSlot def) {
-        ItemStack item = new ItemStack(def.material());
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            meta.customName(ColorUtil.parse(def.name()));
-            List<Component> loreList = new ArrayList<>();
-            for (String lore : def.lore()) {
-                loreList.add(ColorUtil.parse(lore));
-            }
-            meta.lore(loreList);
-            meta.setEnchantmentGlintOverride(def.glow());
-            item.setItemMeta(meta);
-        }
         return item;
     }
 }
