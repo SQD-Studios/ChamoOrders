@@ -15,8 +15,8 @@ import com.sqdstudios.sqdlib.paper.util.DebugLogger;
 import com.sqdstudios.sqdlib.paper.util.LanguageUtil;
 import com.sqdstudios.sqdlib.paper.util.LoggerUtil;
 import com.sqdstudios.sqdlib.util.log.LogType;
-import dev.faststats.bukkit.BukkitMetrics;
-import dev.faststats.core.ErrorTracker;
+import dev.faststats.ErrorTracker;
+import dev.faststats.bukkit.BukkitContext;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -31,10 +31,9 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrdersApi {
     private DatabaseManager databaseManager;
 
 
-    private final BukkitMetrics fastStats = BukkitMetrics.factory()
-            .token("5a479db4d8148ff3071847a38980ebe4")
-            .errorTracker(ErrorTracker.contextAware())
-            .create(this);
+    private final BukkitContext fastStats = new BukkitContext.Factory(this, "5a479db4d8148ff3071847a38980ebe4")
+            .errorTrackerService(ErrorTracker.contextAware())
+            .create();
 
     @Override
     public void onEnable() {
@@ -87,13 +86,12 @@ public class ChamoOrdersPlugin extends JavaPlugin implements ChamoOrdersApi {
 
     private void init() {
         if (languageUtil == null) languageUtil = new LanguageUtil(this);
-        if (dialogUtil == null) dialogUtil = new SimpleDialog(this);
     }
 
     private void registerCommands() {
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,event -> {
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             AdminCommandBrigadier.register(event.registrar(), this);
-            OrderCommandBrigadier.register(event.registrar(), this, dialogUtil, databaseManager);
+            OrderCommandBrigadier.register(event.registrar(), this, databaseManager);
             LoggerUtil.log(LogType.INFO, "Successfully registered commands");
         });
     }

@@ -32,6 +32,3 @@ permissions:
 
   chamoorders.orderlimit.<limit>:
     default: false
-
-  chamoorders.orderlimit.8:
-    default: true

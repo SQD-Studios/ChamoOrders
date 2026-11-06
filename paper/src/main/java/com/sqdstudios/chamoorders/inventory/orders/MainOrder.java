@@ -51,16 +51,14 @@ public class MainOrder implements GuiListener.ChamoGui {
 
     private final Player player;
     private final ChamoOrdersPlugin plugin;
-    private final SimpleDialog dialogUtil;
 
     private int filterMode = 0;
 
-    public MainOrder(Player player, ChamoOrdersPlugin plugin, DatabaseManager databaseManager, SimpleDialog dialogUtil) {
+    public MainOrder(Player player, ChamoOrdersPlugin plugin, DatabaseManager databaseManager) {
         this.ordersConfig = ConfigUtil.loadOrAdapt(plugin, "ui/inv/orders.yml");
         this.databaseManager = databaseManager;
         this.player = player;
         this.plugin = plugin;
-        this.dialogUtil = dialogUtil;
         this.slots = parseSlots(ordersConfig.getConfigurationSection("slots"));
 
         this.inventory = Bukkit.createInventory(
@@ -160,7 +158,7 @@ public class MainOrder implements GuiListener.ChamoGui {
             case CustomSlotTypes.SearchSlot _ -> {
                 refresh();
                 if (search == null) {
-                    dialogUtil.getInput(searchDialog.getRichMessage("title", ColorUtil.parse("Search:")), player, "selectionsearch", searchDialog.getRichMessage("content", ColorUtil.parse("Search")), search,
+                    SimpleDialog.getInput(searchDialog.getRichMessage("title", ColorUtil.parse("Search:")), player, "selectionsearch", searchDialog.getRichMessage("content", ColorUtil.parse("Search")), search,
                             input -> {
                                 if (input == null) {
                                     return;
@@ -204,7 +202,7 @@ public class MainOrder implements GuiListener.ChamoGui {
                     );
                 }
             }
-            case CustomSlotTypes.OpenYourOrderGui _ -> new YourOrders(plugin, dialogUtil, player, this, databaseManager).open();
+            case CustomSlotTypes.OpenYourOrderGui _ -> new YourOrders(plugin, player, this, databaseManager).open();
             default -> {
             }
         }

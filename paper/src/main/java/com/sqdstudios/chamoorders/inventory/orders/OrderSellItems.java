@@ -20,18 +20,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class OrderSellItems implements GuiListener.ChamoGui {
 
     private final YamlConfiguration config;
     private List<GuiSlot> slots;
 
-    private int deliverItemsSlot = -10;
-    private int openDeliverUiSlot = -10;
+    private Map<Integer, GuiSlot> slotsMap = new HashMap<>();
 
     private Inventory inventory;
 
@@ -65,12 +61,12 @@ public class OrderSellItems implements GuiListener.ChamoGui {
         for (GuiSlot slot : slots) {
             switch (slot.type()) {
                 case CustomSlotTypes.DeliverItems _ -> {
-                    deliverItemsSlot = slot.slot();
+                    int deliverItemsSlot = slot.slot();
                     pluginItems.add(deliverItemsSlot);
                     inventory.setItem(deliverItemsSlot, createStaticItem(slot));
                 }
                 case CustomSlotTypes.OpenDeliverUi __ -> {
-                    openDeliverUiSlot = slot.slot();
+                    int openDeliverUiSlot = slot.slot();
                     pluginItems.add(openDeliverUiSlot);
                     inventory.setItem(openDeliverUiSlot, createStaticItem(slot));
                 }
@@ -79,6 +75,7 @@ public class OrderSellItems implements GuiListener.ChamoGui {
                     inventory.setItem(slot.slot(), createStaticItem(slot));
                 }
             }
+            slotsMap.put(slot.slot(), slot);
         }
     }
 

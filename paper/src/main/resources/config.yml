@@ -33,8 +33,7 @@ database:
 # Order related settings
 orders:
   new-order-settings:
-    tax-percent: 0.1 # Extra percentage charged when a player creates a new order.
-    default-max-orders: 3 # Set -1 to allow infinite. You can set permissions like chamoorders.maxorders.(number of orders) for a different one
+    default-max-orders: 3 # Set -1 to allow infinite. You can set permissions like chamoorders.orderlimit.(number of orders) for a different one
 
   # Item settings
   items:

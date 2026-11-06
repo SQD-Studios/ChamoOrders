@@ -3,16 +3,21 @@ package com.sqdstudios.chamoorders.inventory.orders;
 import com.sqdstudios.chamoorders.api.database.DatabaseManager;
 import com.sqdstudios.chamoorders.api.model.Order;
 import com.sqdstudios.chamoorders.api.model.OrderItem;
-import com.sqdstudios.sqdlib.paper.chamogui.GuiFillerUtil;
 import com.sqdstudios.sqdlib.paper.chamogui.config.GuiSlot;
 import com.sqdstudios.sqdlib.paper.chamogui.config.SlotType;
 import com.sqdstudios.sqdlib.paper.chamogui.listener.GuiListener;
 import com.sqdstudios.sqdlib.paper.dialog.SimpleDialog;
+import com.sqdstudios.sqdlib.paper.dialog.donutsmp.EnchantmentChoiceDialog;
+import com.sqdstudios.sqdlib.paper.dialog.donutsmp.OneChoiceDialog;
+import com.sqdstudios.sqdlib.paper.econ.EconomyUtil;
 import com.sqdstudios.sqdlib.paper.util.ColorUtil;
 import com.sqdstudios.sqdlib.paper.util.ConfigUtil;
+import com.sqdstudios.sqdlib.paper.util.LoggerUtil;
 import com.sqdstudios.sqdlib.paper.util.SchedulerUtil;
+import com.sqdstudios.sqdlib.util.log.LogType;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -34,7 +39,6 @@ public class YourOrders implements GuiListener.ChamoGui {
     private final ConfigurationSection config;
 
     private final Plugin plugin;
-    private final SimpleDialog simpleDialog;
     private final Player player;
     private final MainOrder mainOrder;
     private final DatabaseManager databaseManager;
@@ -43,9 +47,8 @@ public class YourOrders implements GuiListener.ChamoGui {
 
     private final List<Order> orders = new ArrayList<>();
 
-    public YourOrders(Plugin plugin, SimpleDialog simpleDialog, Player player, MainOrder mainOrder, DatabaseManager databaseManager) {
+    public YourOrders(Plugin plugin, Player player, MainOrder mainOrder, DatabaseManager databaseManager) {
         this.config = ConfigUtil.loadDataFile(plugin, "ui/inv/yourorders.yml");
-        this.simpleDialog = simpleDialog;
 
         this.inventory = Bukkit.createInventory(this, config.getInt("size"), ColorUtil.parse(config.getString("title", "<dark_gray>Your Orders")));
 
@@ -54,16 +57,13 @@ public class YourOrders implements GuiListener.ChamoGui {
         this.mainOrder = mainOrder;
         this.databaseManager = databaseManager;
 
+        databaseManager.getPlayerOrders(player).whenComplete((playerOrders, _) -> orders.addAll(playerOrders));
+
         refresh();
     }
 
     public void refresh() {
         inventory.clear();
-        orders.clear();
-
-        databaseManager.getPlayerOrders(player).whenComplete((playerOrders, _) -> orders.addAll(playerOrders));
-
-        GuiFillerUtil.apply(plugin, inventory, player);
 
         int currentOrderIndex = 0;
         for (Order order : orders) {
@@ -80,6 +80,7 @@ public class YourOrders implements GuiListener.ChamoGui {
                 false
         );
 
+        LoggerUtil.log(LogType.INFO, "Orders can have: " + howManyOrdersCanHave());
         while (howManyOrdersCanHave() > currentOrderIndex) {
             slotsCanCreate.add(currentOrderIndex);
             inventory.setItem(currentOrderIndex, createStaticItem(canCreate));
@@ -102,12 +103,12 @@ public class YourOrders implements GuiListener.ChamoGui {
     }
 
     private int howManyOrdersCanHave() {
-        for (int i = 0; i <= inventory.getSize(); i++) {
+        for (int i = inventory.getSize(); i > 0; i--) {
             if (player.hasPermission("chamoorders.orderlimit." + i)) {
                 return i;
             }
         }
-        return 0;
+        return plugin.getConfig().getInt("orders.new-order-settings.default-max-orders");
     }
 
     public void open() {
@@ -122,58 +123,72 @@ public class YourOrders implements GuiListener.ChamoGui {
         int slot = event.getRawSlot();
 
         if (slotsCanCreate.contains(slot)) {
-            SchedulerUtil.runForEntity(plugin, player, () -> {
-                Material material;
-                simpleDialog.getInput(ColorUtil.parse(""), player, "orderamount", ColorUtil.parse(""), null,
-                        stringOrderAmount -> {
-                            try {
-                                int orderAmount = Integer.parseInt(stringOrderAmount);
+            SchedulerUtil.runForEntity(plugin, player, () ->
+                    OneChoiceDialog.builder(
+                                    ColorUtil.parse("Select a material"),
+                                    Arrays.stream(Material.values()).filter(mat -> !mat.isLegacy() && mat.isItem()).toList(),
+                                    mat -> Component.translatable(new ItemStack(mat))
+                            )
+                            .onChoose((_, material) -> {
+                                Map<Enchantment, Integer> enchantments = new HashMap<>();
+                                ItemStack item = new ItemStack(material);
 
-                                simpleDialog.getInput(ColorUtil.parse(""), player, "priceperitem", ColorUtil.parse(""), null,
-                                        pricePerItemString -> {
-                                            double pricePerItem = Double.parseDouble(pricePerItemString);
+                                boolean has = false;
+                                for (Enchantment enchantment : RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT)) {
+                                    if (enchantment.canEnchantItem(item)) {
+                                        has = true;
+                                        break;
+                                    }
+                                }
 
-                                            List<Enchantment> availableEnchants = new ArrayList<>();
-                                            ItemStack matAsStack = new ItemStack(material);
+                                if (has) {
+                                    EnchantmentChoiceDialog.builder()
+                                            .onContinue((_, map) -> enchantments.putAll(map))
+                                            .filter(enchantment -> enchantment.canEnchantItem(item))
+                                            .build()
+                                            .open(player);
+                                }
 
-                                            RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).forEach(
-                                                    enchantment -> {
-                                                        try {
-                                                            matAsStack.addEnchantment(enchantment, 1);
-                                                            availableEnchants.add(enchantment);
-                                                        } catch (Exception _) {
-                                                        }
-                                                    }
-                                            );
 
-                                            Map<Enchantment, Integer> selectedEnchants = new HashMap<>();
+                                try {
+                                    SimpleDialog.getInput(ColorUtil.parse("Choose an amount"), player, "chooseamountforneworder", ColorUtil.parse("Amount:"), null,
+                                            stringAmount -> {
+                                                int amount = Integer.parseInt(stringAmount);
 
-                                            OrderItem orderItem = new OrderItem(
-                                                    material,
-                                                    selectedEnchants
-                                            );
+                                                SimpleDialog.getInput(ColorUtil.parse("Choose a price"), player, "choosepriceforneworder", ColorUtil.parse("Price:"), null,
+                                                        input -> {
+                                                            double price = Double.parseDouble(input);
 
-                                            Order order = new Order(
-                                                    orderItem,
-                                                    pricePerItem,
-                                                    orderAmount,
-                                                    0,
-                                                    player,
-                                                    UUID.randomUUID()
-                                            );
-                                            databaseManager.addOrder(order);
-                                            refresh();
-                                        });
+                                                            Order order = new Order(
+                                                                    new OrderItem(
+                                                                            material,
+                                                                            enchantments
+                                                                    ),
+                                                                    price,
+                                                                    amount,
+                                                                    0,
+                                                                    player,
+                                                                    player.getUniqueId()
+                                                            );
+                                                            EconomyUtil.TransactionType transactionType = EconomyUtil.withdrawPlayer(player, price * amount);
+                                                            if (transactionType.isSuccess()) {
+                                                                databaseManager.addOrder(order);
+                                                                orders.add(order);
+                                                            } else {
+                                                                player.sendMessage(ColorUtil.parse("<red>Failed to create order"));
+                                                            }
 
-                            } catch (NumberFormatException e) {
-                                player.closeDialog();
-                                player.closeInventory();
-                                player.sendMessage(ColorUtil.parse("<red>This is not a valid number!"));
-                            }
-                        });
-            }, null);
+                                                            refresh();
+                                                        });
+                                            });
+                                } catch (NumberFormatException e) {
+                                    player.sendMessage(ColorUtil.parse("<red>Not a valid price!"));
+                                }
+                            })
+                            .build().open(player), null);
         }
     }
+
 
     @Override
     public void handleClose(InventoryCloseEvent event) {
@@ -186,19 +201,16 @@ public class YourOrders implements GuiListener.ChamoGui {
     }
 
     private @NotNull ItemStack createStaticItem(@NotNull GuiSlot def) {
-        if (def.material() != null) {
-            ItemStack item = new ItemStack(def.material());
-            var meta = item.getItemMeta();
-            if (meta != null) {
-                meta.customName(ColorUtil.parse(player, def.name(), Map.of()));
-                meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l, Map.of())).toList());
-                if (def.glow()) {
-                    meta.setEnchantmentGlintOverride(true);
-                }
-                item.setItemMeta(meta);
+        ItemStack item = new ItemStack(def.material());
+        var meta = item.getItemMeta();
+        if (meta != null) {
+            meta.customName(ColorUtil.parse(player, def.name()));
+            meta.lore(def.lore().stream().map(l -> ColorUtil.parse(player, l)).toList());
+            if (def.glow()) {
+                meta.setEnchantmentGlintOverride(true);
             }
-            return item;
+            item.setItemMeta(meta);
         }
-        return new ItemStack(Material.BARRIER);
+        return item;
     }
 }
